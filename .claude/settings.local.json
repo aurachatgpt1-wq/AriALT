@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__4687395f-901b-4c2e-ad4e-4e0b49c55fe9__resolve-library-id",
+      "mcp__4687395f-901b-4c2e-ad4e-4e0b49c55fe9__query-docs",
+      "Bash(npx create-video@latest . --blank)",
+      "Read(//c/Users/Brahim/Desktop/VideoPromotional/**)",
+      "Bash(npx create-video@latest aria-temp --blank)",
+      "Bash(gh repo:*)",
+      "Bash(npm install:*)",
+      "Bash(npx next:*)",
+      "Bash(npx remotion:*)",
+      "Bash(find C:/Users/Brahim/Desktop/VisualStudioCode/AriA -name logo*)",
+      "Bash(cp \"C:/Users/Brahim/Desktop/VisualStudioCode/AriA/aria/public/logo_no_background_high_res \\(2\\).png\" \"C:/Users/Brahim/Desktop/VideoPromotional/AriA/public/aria-logo.png\")",
+      "Bash(cp \"C:/Users/Brahim/Desktop/VisualStudioCode/AriA/aria/public/logo.png\" \"C:/Users/Brahim/Desktop/VideoPromotional/AriA/public/aria-logo-full.png\")",
+      "Bash(find C:UsersBrahimDesktopVisualStudioCodeAriAariacomponentscmms -type f -name *.tsx)",
+      "Bash(grep -r \"status-success\\\\|status-warning\\\\|status-critical\" C:UsersBrahimDesktopVisualStudioCodeAriAaria --include=*.css --include=*.ts)",
+      "Bash(npx tsc:*)",
+      "Bash(grep -E \"\\\\.tsx$\")",
+      "Bash(xargs ls:*)",
+      "Bash(start cmd:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(find \"C:\\\\Users\\\\Brahim\\\\Desktop\\\\VisualStudioCode\\\\AriA/aria/app/\\(dashboard\\)\" -type f -name \"layout.tsx\")",
+      "Bash(find C:UsersBrahimDesktopVisualStudioCodeAriA/aria/server -type f \\\\\\(-name *.ts -o -name *.js \\\\\\))",
+      "Bash(find C:UsersBrahimDesktopVisualStudioCodeAriA -type f -path */routes/* -o -path */controllers/*)",
+      "Bash(find C:UsersBrahimDesktopVisualStudioCodeAriA/aria/app/api -type f -name *.ts)",
+      "Bash(grep -r \"StepHero\\\\|StepCreatePlant\\\\|StepUpload\\\\|StepAI\\\\|StepComplete\" C:UsersBrahimDesktopVisualStudioCodeAriA/aria --include=*.tsx --include=*.ts)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Read(//tmp/awesome-claude-skills/**)",
+      "WebSearch",
+      "Read(//e/Dowloand/Videoref/**)",
+      "Read(//e/Dowloand/Videoref//**)",
+      "Bash(sed -i 's|from \"../constants\"|from \"../../actbonus/constants\"|g' \"C:/Users/Brahim/Desktop/VideoPromotional/AriA/src/remotion/actbonus/scenes/SceneB3Problems.tsx\")",
+      "Bash(sed -i 's|from \"../constants\"|from \"../../actbonus/constants\"|g' \"C:/Users/Brahim/Desktop/VideoPromotional/AriA/src/remotion/actbonus/scenes/SceneB4Bridge.tsx\")"
+    ]
+  }
+}
