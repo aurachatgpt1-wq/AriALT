@@ -32,7 +32,11 @@
       "Read(//e/Dowloand/Videoref/**)",
       "Read(//e/Dowloand/Videoref//**)",
       "Bash(sed -i 's|from \"../constants\"|from \"../../actbonus/constants\"|g' \"C:/Users/Brahim/Desktop/VideoPromotional/AriA/src/remotion/actbonus/scenes/SceneB3Problems.tsx\")",
-      "Bash(sed -i 's|from \"../constants\"|from \"../../actbonus/constants\"|g' \"C:/Users/Brahim/Desktop/VideoPromotional/AriA/src/remotion/actbonus/scenes/SceneB4Bridge.tsx\")"
+      "Bash(sed -i 's|from \"../constants\"|from \"../../actbonus/constants\"|g' \"C:/Users/Brahim/Desktop/VideoPromotional/AriA/src/remotion/actbonus/scenes/SceneB4Bridge.tsx\")",
+      "Bash(npm run:*)",
+      "Bash(git checkout:*)",
+      "Bash(xxd)",
+      "Bash(python3 *)"
     ]
   }
 }

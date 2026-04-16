@@ -7,7 +7,6 @@ import { Scene2CopyPaste } from "./scenes/Scene2CopyPaste";
 import { SceneThreeProblems } from "./scenes/SceneThreeProblems";
 import { SceneFasterStill } from "./scenes/SceneFasterStill";
 import { SceneBridge } from "./scenes/SceneBridge";
-import { SceneShowcase } from "./scenes/SceneShowcase";
 import { SceneBridgeList } from "./scenes/SceneBridgeList";
 
 // Scene 1 + Scene 2 are one continuous ChatGPT session — no cut, no transition
@@ -60,20 +59,9 @@ export const Act15Composition: React.FC = () => {
           timing={linearTiming({ durationInFrames: 30 })}
         />
 
-        {/* SceneBridge — 425 frames (title + Introducing + flip + two-phase tagline) */}
-        <TransitionSeries.Sequence durationInFrames={425}>
+        {/* SceneBridge — 735 frames */}
+        <TransitionSeries.Sequence durationInFrames={735}>
           <SceneBridge />
-        </TransitionSeries.Sequence>
-
-        {/* → SceneShowcase: 25f crossfade (logo carries through) */}
-        <TransitionSeries.Transition
-          presentation={fade()}
-          timing={linearTiming({ durationInFrames: 25 })}
-        />
-
-        {/* SceneShowcase — 310 frames (logo morph + screenshots + tagline) */}
-        <TransitionSeries.Sequence durationInFrames={310}>
-          <SceneShowcase />
         </TransitionSeries.Sequence>
 
         {/* → SceneBridgeList: 25f crossfade (logo carries through) */}
@@ -82,8 +70,8 @@ export const Act15Composition: React.FC = () => {
           timing={linearTiming({ durationInFrames: 25 })}
         />
 
-        {/* SceneBridgeList — 250 frames (curved list + zoom) */}
-        <TransitionSeries.Sequence durationInFrames={250}>
+        {/* SceneBridgeList — 330 frames (~11s) */}
+        <TransitionSeries.Sequence durationInFrames={330}>
           <SceneBridgeList />
         </TransitionSeries.Sequence>
 

@@ -14,14 +14,11 @@ export const SCENE_THREE_START     = 660;
 export const SCENE_THREE_DURATION  = 270; // 9s
 
 export const SCENE_BRIDGE_START    = 930;
-export const SCENE_BRIDGE_DURATION = 425; // ~14.1s — title + Introducing + flip + two-phase tagline
+export const SCENE_BRIDGE_DURATION = 735;
 
-export const SCENE_SHOWCASE_DURATION = 310; // ~10s — logo morph + screenshots + tagline
+export const SCENE_BRIDGELIST_DURATION = 330; // ~11s — curved list + zoom
 
-export const SCENE_BRIDGELIST_DURATION = 250; // ~8s — curved list + zoom
-
-// 660+270+270+310+310+250 = 2070 gross, minus transitions (20+20+30+25+25) = 120
-export const TOTAL_FRAMES_15 = 2065;
+export const TOTAL_FRAMES_15 = 2290;
 
 // ─── ChatGPT content ──────────────────────────────────────────────────────────
 export const GPT_USER_MSG =

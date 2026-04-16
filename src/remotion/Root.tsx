@@ -36,14 +36,12 @@ import { Scene2CopyPaste } from "./act15/scenes/Scene2CopyPaste";
 import { SceneThreeProblems } from "./act15/scenes/SceneThreeProblems";
 import { SceneFasterStill } from "./act15/scenes/SceneFasterStill";
 import { SceneBridge } from "./act15/scenes/SceneBridge";
-import { SceneShowcase } from "./act15/scenes/SceneShowcase";
 import { SceneBridgeList } from "./act15/scenes/SceneBridgeList";
 import {
   SCENE_CHAT_DURATION,
   SCENE_2_DURATION as SCENE_15_2_DURATION,
   SCENE_THREE_DURATION,
   SCENE_BRIDGE_DURATION,
-  SCENE_SHOWCASE_DURATION,
   SCENE_BRIDGELIST_DURATION,
 } from "./act15/constants";
 
@@ -208,14 +206,6 @@ export const RemotionRoot: React.FC = () => {
         id="A15-S5-Bridge"
         component={SceneBridge}
         durationInFrames={SCENE_BRIDGE_DURATION}
-        fps={FPS15}
-        width={1920}
-        height={1080}
-      />
-      <Composition
-        id="A15-S6-Showcase"
-        component={SceneShowcase}
-        durationInFrames={SCENE_SHOWCASE_DURATION}
         fps={FPS15}
         width={1920}
         height={1080}

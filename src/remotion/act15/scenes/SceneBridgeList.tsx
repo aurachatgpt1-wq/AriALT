@@ -15,6 +15,10 @@ const ITEMS = [
   "Memory Persistent",
   "Context-aware",
   "No prompts needed",
+  "No developers required",
+  "No data preparation",
+  "No additional hardware",
+  "Zero expertise required",
   "Tailored on your Data",
   "Works with your existing systems",
   "Compliant with your standards",
@@ -25,28 +29,28 @@ const ITEMS = [
 const LAST_IDX = ITEMS.length - 1;
 
 // ─── Timing (relative to this scene's frame 0) ──────────────────────────────
-const T_LIST_IN     = 10;           // list starts scrolling
-const T_LIST_BASE   = 18;
-const LIST_STEP     = 19;
-const T_ZOOM        = T_LIST_BASE + 7 * LIST_STEP + 28;     // ~179
-const T_FINAL_ZOOM_END  = T_ZOOM + 30;
-const T_FINAL_HOLD_END  = T_FINAL_ZOOM_END + 18;
-const T_SCENE_OUT_START = T_FINAL_HOLD_END;
-const T_SCENE_OUT_END   = T_SCENE_OUT_START + 17;
+const T_LIST_IN    = 10;
+const T_LIST_BASE  = 18;
+const LIST_STEP    = 21;          // ~9s per passata (21f/item × 11 passi + settle)
+
+const T_ZOOM           = T_LIST_BASE + 11 * LIST_STEP + 28;  // 277
+const T_FINAL_ZOOM_END = T_ZOOM + 30;                         // 307
+const T_SCENE_OUT_START = T_FINAL_ZOOM_END;                   // 307
+const T_SCENE_OUT_END   = T_SCENE_OUT_START + 17;             // 324
 
 // ─── Layout ──────────────────────────────────────────────────────────────────
-const CHECK_Y       = 540;
-const SLOT_H        = 150;
+const CHECK_Y         = 540;
+const SLOT_H          = 150;
 const CHECK_LOGO_SIZE = 128;
-const LOGO_GAP      = 52;
-const CHECK_LOGO_CX = 580;
-const CHECK_LOGO_CY = CHECK_Y;
-const FOCUSED_TEXT_X = CHECK_LOGO_CX + CHECK_LOGO_SIZE / 2 + LOGO_GAP;
-const CURVE_MAX_PX  = 230;
-const CURVE_MAX_DIST = 2.6;
-const LOGO_BR_RATIO = 0.22;
-const FOCAL_X       = CHECK_LOGO_CX + 260;
-const FOCAL_Y       = CHECK_Y;
+const LOGO_GAP        = 52;
+const CHECK_LOGO_CX   = 580;
+const CHECK_LOGO_CY   = CHECK_Y;
+const FOCUSED_TEXT_X  = CHECK_LOGO_CX + CHECK_LOGO_SIZE / 2 + LOGO_GAP;
+const CURVE_MAX_PX    = 230;
+const CURVE_MAX_DIST  = 2.6;
+const LOGO_BR_RATIO   = 0.22;
+const FOCAL_X         = CHECK_LOGO_CX + 260;
+const FOCAL_Y         = CHECK_Y;
 
 // ─── Scene ────────────────────────────────────────────────────────────────────
 export const SceneBridgeList: React.FC = () => {
@@ -60,24 +64,20 @@ export const SceneBridgeList: React.FC = () => {
   // List entrance
   const p2Op = interpolate(frame, [T_LIST_IN, T_LIST_IN + 14], [0, 1], clamp);
 
-  // List scroll
-  const TRIGGERS = Array.from({ length: 8 }, (_, i) => T_LIST_BASE + i * LIST_STEP);
+  // ── Scroll ────────────────────────────────────────────────────────────────
+  const TRIGGERS = Array.from({ length: 12 }, (_, i) => T_LIST_BASE + i * LIST_STEP);
   const scrollPos = TRIGGERS.reduce((acc, f) =>
     acc + spring({ frame: frame - f, fps, config: { stiffness: 110, damping: 26, mass: 1.1 } }),
     0
   );
 
-  // Per-item zoom
+  // ── Zoom ──────────────────────────────────────────────────────────────────
   const zoomT = spring({ frame: frame - T_ZOOM, fps, config: { stiffness: 100, damping: 20, mass: 1.3 } });
   const zoomScale = interpolate(zoomT, [0, 1], [1, 1.32]);
 
-  // Camera zoom
-  const finalZoomT = spring({
-    frame: frame - T_ZOOM, fps,
-    config: { stiffness: 70, damping: 22, mass: 1.4 },
-  });
+  const finalZoomT = spring({ frame: frame - T_ZOOM, fps, config: { stiffness: 70, damping: 22, mass: 1.4 } });
   const cameraScale = interpolate(finalZoomT, [0, 1], [1, 1.65]);
-  const vignetteOp = interpolate(finalZoomT, [0, 1], [0, 0.55], clamp);
+  const vignetteOp  = interpolate(finalZoomT, [0, 1], [0, 0.55], clamp);
 
   return (
     <AbsoluteFill style={{ opacity: sceneOp }}>
