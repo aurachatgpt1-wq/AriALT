@@ -5,6 +5,10 @@ import { COLORS, FONT_SIZES, ACCUMULATE_SPRING, UI_TOP, UI_BOTTOM_MARGIN } from 
 interface ExcelOverlayProps {
   slideInFrame?: number;
   highlightedRow?: number;
+  /** When provided, overrides the default top/right/bottom positioning */
+  bounds?: { top?: number; right?: number; bottom?: number; width?: number };
+  /** Title bar style — win10 is flat, legacy is the old XP-green */
+  chromeStyle?: "legacy" | "win10";
 }
 
 const EXCEL_DATA = [
@@ -23,6 +27,8 @@ const HEADERS = ["Code", "Asset", "Freq.", "Last Maint.", "Next", "Notes"];
 export const ExcelOverlay: React.FC<ExcelOverlayProps> = ({
   slideInFrame = 0,
   highlightedRow = -1,
+  bounds,
+  chromeStyle = "legacy",
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -33,34 +39,132 @@ export const ExcelOverlay: React.FC<ExcelOverlayProps> = ({
 
   if (frame < slideInFrame) return null;
 
+  const isWin10 = chromeStyle === "win10";
+  const top = bounds?.top ?? UI_TOP;
+  const right = bounds?.right ?? 20;
+  const bottom = bounds?.bottom ?? UI_BOTTOM_MARGIN;
+  const width = bounds?.width ?? 720;
+
   return (
     <div
       style={{
         position: "absolute",
-        top: UI_TOP,
-        right: 20,
-        width: 720,
-        bottom: UI_BOTTOM_MARGIN,
+        top,
+        right,
+        width,
+        bottom,
         transform: `translateX(${translateX}px)`,
         opacity,
         display: "flex",
         flexDirection: "column",
-        borderRadius: 4,
+        borderRadius: isWin10 ? 0 : 4,
         overflow: "hidden",
-        border: `1px solid ${COLORS.cmmsBorder}`,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+        border: isWin10
+          ? `1px solid ${COLORS.win10WindowBorder}`
+          : `1px solid ${COLORS.cmmsBorder}`,
+        boxShadow: isWin10
+          ? `0 10px 32px ${COLORS.win10WindowShadow}, 0 2px 6px rgba(0,0,0,0.18)`
+          : "0 4px 20px rgba(0,0,0,0.15)",
         zIndex: 100,
       }}
     >
       {/* Excel title bar */}
-      <div style={{ height: 28, backgroundColor: COLORS.excelGreen, display: "flex", alignItems: "center", padding: "0 10px", justifyContent: "space-between" }}>
-        <span style={{ color: "white", fontSize: 12, fontWeight: 600 }}>Maintenance_Plan_2024.xlsx — Microsoft Excel</span>
-        <div style={{ display: "flex", gap: 6 }}>
-          {["─", "□", "×"].map((icon, i) => (
-            <div key={i} style={{ width: 12, height: 12, borderRadius: 1, backgroundColor: i === 2 ? "#C75050" : "rgba(255,255,255,0.3)", fontSize: i === 1 ? 8 : 9, color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>{icon}</div>
-          ))}
+      {isWin10 ? (
+        <div
+          style={{
+            height: 32,
+            background: "#FFFFFF",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: 0,
+            borderBottom: `1px solid ${COLORS.win10WindowBorder}`,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8, paddingLeft: 10 }}>
+            <div
+              style={{
+                width: 16,
+                height: 16,
+                background: COLORS.excelGreen,
+                color: "#FFFFFF",
+                fontSize: 10,
+                fontWeight: 700,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 1,
+              }}
+            >
+              X
+            </div>
+            <span
+              style={{
+                color: "#2B2B2B",
+                fontSize: 12,
+                fontWeight: 400,
+                letterSpacing: "0.01em",
+              }}
+            >
+              Maintenance_Plan_2024.xlsx — Excel
+            </span>
+          </div>
+          <div style={{ display: "flex", height: "100%" }}>
+            {["─", "☐", "✕"].map((icon, i) => (
+              <div
+                key={i}
+                style={{
+                  width: 46,
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 11,
+                  fontWeight: 400,
+                  color: "#2B2B2B",
+                }}
+              >
+                {icon}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div style={{ height: 28, backgroundColor: COLORS.excelGreen, display: "flex", alignItems: "center", padding: "0 10px", justifyContent: "space-between" }}>
+          <span style={{ color: "white", fontSize: 12, fontWeight: 600 }}>Maintenance_Plan_2024.xlsx — Microsoft Excel</span>
+          <div style={{ display: "flex", gap: 6 }}>
+            {["─", "□", "×"].map((icon, i) => (
+              <div key={i} style={{ width: 12, height: 12, borderRadius: 1, backgroundColor: i === 2 ? "#C75050" : "rgba(255,255,255,0.3)", fontSize: i === 1 ? 8 : 9, color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>{icon}</div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Ribbon tab strip (win10 only — Excel green ribbon accent) */}
+      {isWin10 && (
+        <div
+          style={{
+            height: 22,
+            background: COLORS.excelGreen,
+            display: "flex",
+            alignItems: "center",
+            padding: "0 8px",
+            gap: 14,
+            fontSize: 11,
+            color: "#FFFFFF",
+            fontWeight: 500,
+          }}
+        >
+          <span>File</span>
+          <span>Home</span>
+          <span>Insert</span>
+          <span>Page Layout</span>
+          <span>Formulas</span>
+          <span style={{ background: "rgba(255,255,255,0.18)", padding: "0 6px" }}>Data</span>
+          <span>Review</span>
+          <span>View</span>
+        </div>
+      )}
 
       {/* Formula bar */}
       <div style={{ height: 24, backgroundColor: COLORS.excelHeaderBg, display: "flex", alignItems: "center", padding: "0 6px", borderBottom: `1px solid ${COLORS.excelGrid}`, fontSize: 11, color: COLORS.cmmsText, fontFamily: "Courier New, monospace" }}>

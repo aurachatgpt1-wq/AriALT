@@ -230,6 +230,7 @@ export const SceneBridgeList: React.FC = () => {
           zIndex: 11, pointerEvents: "none", mixBlendMode: "multiply",
         }} />
       )}
+
     </AbsoluteFill>
   );
 };

@@ -8,6 +8,7 @@ interface WizardShellProps {
   progressOverride?: number; // 0-100, overrides auto
   children: React.ReactNode;
   enterFrame?: number;
+  dramaticEntrance?: boolean;  // emerge-from-center transition
 }
 
 const STEP_LABELS = ["Welcome", "Your Plant", "Documents", "AI Agents", "Ready"];
@@ -18,20 +19,33 @@ export const WizardShell: React.FC<WizardShellProps> = ({
   progressOverride,
   children,
   enterFrame = 0,
+  dramaticEntrance = false,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const enterT = spring({ frame: frame - enterFrame, fps, config: { damping: 22, stiffness: 180, mass: 0.7 } });
+  const enterT = spring({
+    frame: frame - enterFrame, fps,
+    config: dramaticEntrance
+      ? { damping: 22, stiffness: 110, mass: 0.9 }   // slower, more dramatic
+      : { damping: 22, stiffness: 180, mass: 0.7 },
+  });
   const opacity = interpolate(enterT, [0, 1], [0, 1]);
-  const scale   = interpolate(enterT, [0, 1], [0.96, 1]);
+  const scale   = dramaticEntrance
+    ? interpolate(enterT, [0, 1], [0.35, 1])        // scales up from small (emerges from center)
+    : interpolate(enterT, [0, 1], [0.96, 1]);
+
+  // For dramatic entrance, fade in the background too so previous scene shows through
+  const bgOpacity = dramaticEntrance
+    ? interpolate(enterT, [0, 1], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })
+    : 1;
 
   const progress = progressOverride ?? ((stepIndex + 1) / totalSteps) * 100;
 
   return (
     <AbsoluteFill style={{ display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-      {/* ── Dynamic animated background (same as form) ── */}
-      <div style={{ position: "absolute", inset: 0, backgroundColor: "#F0F3FF" }} />
+      {/* ── Dynamic animated background (same as form) — fades in for dramatic entrance ── */}
+      <div style={{ position: "absolute", inset: 0, backgroundColor: "#F0F3FF", opacity: bgOpacity }} />
 
       {/* Blob 1 — primary blue, top-left, slow drift */}
       <div style={{
@@ -41,6 +55,7 @@ export const WizardShell: React.FC<WizardShellProps> = ({
         left: interpolate(frame, [0, 300], [-120, 60]),
         top:  interpolate(frame, [0, 300], [-160, -80]),
         filter: "blur(60px)",
+        opacity: bgOpacity,
       }} />
 
       {/* Blob 2 — accent blue, right, oscillates */}

@@ -14,19 +14,21 @@ export const UI_BOTTOM_MARGIN = TEXT_ZONE_HEIGHT + 10; // px from bottom where U
 export const FPS = 30;
 export const SCENE_0_START = 0;
 export const SCENE_0_DURATION = 90;  // 3s
-export const SCENE_1_START = 90;
-export const SCENE_1_DURATION = 150; // 5s
-export const SCENE_2_START = 240;
+export const SCENE_OPEN_CMMS_START = 90;
+export const SCENE_OPEN_CMMS_DURATION = 165; // ~5.5s — desktop → splash → list → + click
+export const SCENE_1_START = 255;
+export const SCENE_1_DURATION = 210; // 7s — form filling
+export const SCENE_2_START = 465;
 export const SCENE_2_DURATION = 240; // 8s
-export const SCENE_3B_START = 480;
+export const SCENE_3B_START = 705;
 export const SCENE_3B_DURATION = 240; // 8s — cost of inefficiency
-export const SCENE_3_START = 720;
+export const SCENE_3_START = 945;
 export const SCENE_3_DURATION = 150; // 5s
-export const SCENE_3C_START = 870;
+export const SCENE_3C_START = 1095;
 export const SCENE_3C_DURATION = 270; // 9s — limits
-export const SCENE_4_START = 1140;
+export const SCENE_4_START = 1365;
 export const SCENE_4_DURATION = 150; // 5s
-export const TOTAL_FRAMES = 1290; // 43s
+export const TOTAL_FRAMES = 1515; // ~50.5s
 
 // Scene 4 sub-phases
 export const FREEZE_DURATION = 45;
@@ -87,6 +89,43 @@ export const COLORS = {
   dropdownBg: "#FFFFFF",
   dropdownHover: "#E8F0FE",
   dropdownBorder: "#C0C0C0",
+
+  // Windows 10 Enterprise (corporate "ugly" palette)
+  win10Wallpaper: "#4A5A6E",       // flat corporate grey-blue
+  win10WallpaperDark: "#384654",   // gradient bottom
+  win10Taskbar: "#1F1F1F",         // dark taskbar
+  win10TaskbarHover: "#2D2D2D",
+  win10Accent: "#0078D4",          // Windows 10 blue
+  win10AccentSoft: "rgba(0,120,212,0.12)",
+  win10WindowBg: "#FFFFFF",
+  win10WindowChrome: "#F3F3F3",    // title bar bg
+  win10WindowBorder: "#CECECE",
+  win10WindowShadow: "rgba(0,0,0,0.28)",
+  win10DesktopText: "#FFFFFF",
+  win10DesktopIconShadow: "rgba(0,0,0,0.65)",
+  win10FocusRing: "#0078D4",
+  win10ToastBg: "#2D2D2D",
+  win10ToastBorder: "#3F3F3F",
+
+  // Enterprise ERP (classic 2000s gestionale style)
+  erpBody: "#E8EAED",              // beige-grey workspace
+  erpToolbar: "#D4D0C8",           // beige toolbar
+  erpSidebar: "#F1EFE4",           // light beige sidebar
+  erpSidebarBorder: "#A8A59A",
+  erpField3DLight: "#FFFFFF",      // 3D inset highlight
+  erpField3DShadow: "#808080",     // 3D inset shadow
+  erpBorder: "#808080",
+  erpBorderDark: "#555555",
+  erpHeaderBlue: "#003366",        // dark navy header band
+  erpHeaderBlueLight: "#255B9E",
+  erpAccentYellow: "#FCB514",      // classic yellow accent
+  erpAccentGreen: "#00A651",       // "execute" green
+  erpAccentRed: "#C00000",
+  erpStatusBar: "#C5C0B0",
+  erpStatusGreen: "#38A238",
+  erpStatusAmber: "#D4A017",
+  erpLinkBlue: "#1F4E79",
+  erpSelectedRow: "#FFF1B8",       // yellow highlight
 } as const;
 
 // Typography sizes

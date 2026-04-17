@@ -118,7 +118,7 @@ function getSlotBounds(i: number) {
 /* ─── Analyzing Phase (before each question) ────────────────────────── */
 // Phrases rotate per question
 const ANALYZING_PHRASES = [
-  "Analyzing",              // before Q1 - Industry
+  "Let's build your environment together",  // before Q1 - Industry
   "Understanding context",  // before Q2 - Main challenge
   "Mapping your team",      // before Q3 - Team size
   "Reading your setup",     // before Q4 - Current tools
@@ -384,7 +384,6 @@ const AnalyzingPhase: React.FC<{ localFrame: number; globalFrame: number; phrase
     : 1;
 
   const dotCount = Math.floor(localFrame / 7) % 4;
-  const dots = ".".repeat(dotCount);
 
   return (
     <div style={{
@@ -400,16 +399,21 @@ const AnalyzingPhase: React.FC<{ localFrame: number; globalFrame: number; phrase
         <WindRing3D size={120} frame={globalFrame} fps={fps} />
       </div>
       <span style={{
-        fontFamily: geistFont, fontSize: 48, fontWeight: 300,
+        fontFamily: geistFont,
+        fontSize: phrase.length > 20 ? 38 : 48,
+        fontWeight: 300,
         letterSpacing: "-0.025em",
-        width: 640,
         textAlign: "left",
         whiteSpace: "nowrap",
         flexShrink: 0,
         opacity: textOpacity,
         ...getShimmerStyle(localFrame),
       }}>
-        {phrase}{dots}
+        {phrase}
+        {/* Reserve space for 3 dots, fade each independently so layout stays stable */}
+        <span style={{ opacity: dotCount >= 1 ? 1 : 0 }}>.</span>
+        <span style={{ opacity: dotCount >= 2 ? 1 : 0 }}>.</span>
+        <span style={{ opacity: dotCount >= 3 ? 1 : 0 }}>.</span>
       </span>
     </div>
   );
@@ -435,9 +439,16 @@ const RegulatoryAnalyzingPhase: React.FC<{ localFrame: number; globalFrame: numb
   const t = localFrame / fps;
   const blobBreathe = 1 + Math.sin(t * 4.6) * 0.13;
 
-  // Dots animation
+  // Dots animation — rendered as 3 independent spans so opacity changes
+  // never shift the surrounding text
   const dotCount = Math.floor(localFrame / 7) % 4;
-  const dots = ".".repeat(dotCount);
+  const StableDots: React.FC = () => (
+    <>
+      <span style={{ opacity: dotCount >= 1 ? 1 : 0 }}>.</span>
+      <span style={{ opacity: dotCount >= 2 ? 1 : 0 }}>.</span>
+      <span style={{ opacity: dotCount >= 3 ? 1 : 0 }}>.</span>
+    </>
+  );
 
   // List scrolling state
   const listLocal = localFrame - REG_LIST_START;
@@ -460,14 +471,14 @@ const RegulatoryAnalyzingPhase: React.FC<{ localFrame: number; globalFrame: numb
   const CENTER_Y = 540;
 
   // List typography — active item is larger/bolder, inactive smaller & dimmer
-  const SLOT_H       = 76;
-  const FONT_ACTIVE  = 40;
-  const FONT_NEAR    = 28;
-  const FONT_FAR     = 22;
-  const BADGE_SIZE   = 62;                            // legacy spacing anchor for TEXT_X
-  const LIST_W       = 820;
+  const SLOT_H       = 100;
+  const FONT_ACTIVE  = 56;
+  const FONT_NEAR    = 38;
+  const FONT_FAR     = 28;
+  const BADGE_SIZE   = 86;                            // legacy spacing anchor for TEXT_X
+  const LIST_W       = 1100;
   const LIST_LEFT    = (1920 - LIST_W) / 2;
-  const TEXT_X       = LIST_LEFT + BADGE_SIZE + 14;
+  const TEXT_X       = LIST_LEFT + BADGE_SIZE + 20;
 
   // ── Phrase-stage blob layout ──
   // Each phrase has its own HUGE, LOW-OPACITY, BLURRED blob that sits at
@@ -478,7 +489,7 @@ const RegulatoryAnalyzingPhase: React.FC<{ localFrame: number; globalFrame: numb
   // opacity while morphing into the list-badge position where the
   // scales-of-justice icon fades in.
   const PHRASE_BLOB_SIZE = 640;   // huge, fills the stage
-  const LIST_BLOB_SIZE   = 104;
+  const LIST_BLOB_SIZE   = 140;
   const LIST_BLOB_CX     = LIST_LEFT + LIST_BLOB_SIZE / 2 - 6;
   const BLOB_LOW_ALPHA   = 0.28;  // very ghostly, soft presence behind the text
   const BLOB_BLUR_PX     = 16;    // heavy blur → diffuse cloud-like feel
@@ -726,7 +737,7 @@ const RegulatoryAnalyzingPhase: React.FC<{ localFrame: number; globalFrame: numb
 
               // After typing completes, append the same cycling "..." dots
               // used by phrases 1 & 2, so phrase 0 gets the thinking feel too.
-              const phrase0Dots = typingDone ? dots : "";
+              const showPhrase0Dots = typingDone;
 
               return (
                 <div style={{
@@ -746,7 +757,7 @@ const RegulatoryAnalyzingPhase: React.FC<{ localFrame: number; globalFrame: numb
                   zIndex: 10,
                   ...getShimmerStyle(localFrame, s.pStart),
                 }}>
-                  {displayText}{phrase0Dots}
+                  {displayText}{showPhrase0Dots && <StableDots />}
                   {showCursor && cursorBlink && (
                     <span style={{
                       display: "inline-block",
@@ -803,7 +814,7 @@ const RegulatoryAnalyzingPhase: React.FC<{ localFrame: number; globalFrame: numb
                   ...getShimmerStyle(localFrame, s.pStart),
                   ...(flashFilter ? { filter: flashFilter } : {}),
                 }}>
-                  {s.phrase}{dots}
+                  {s.phrase}<StableDots />
                 </div>
               );
             })()}
@@ -814,22 +825,6 @@ const RegulatoryAnalyzingPhase: React.FC<{ localFrame: number; globalFrame: numb
       {/* ── Scrolling regulations list ── */}
       {localFrame >= REG_LIST_START - 12 && (
         <div style={{ position: "absolute", inset: 0, opacity: listOpacity }}>
-          {/* Small uppercase label */}
-          <div style={{
-            position: "absolute",
-            left: 0, right: 0,
-            top: CENTER_Y - 260,
-            textAlign: "center",
-            fontFamily: geistFont,
-            fontSize: 15,
-            fontWeight: 600,
-            letterSpacing: "0.24em",
-            textTransform: "uppercase",
-            color: "rgba(59,91,219,0.62)",
-          }}>
-            Applicable Standards · Europe
-          </div>
-
           {/* Items — variable size (active bigger), masked wrapper */}
           <div style={{
             position: "absolute",

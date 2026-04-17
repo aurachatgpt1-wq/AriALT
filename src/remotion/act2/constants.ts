@@ -14,22 +14,34 @@ export const SCENE_AREAS_DURATION = 520;  // ~17s – areas + sectors orbit + me
 export const SCENE_FORM_START    = 610;
 export const SCENE_FORM_DURATION = 1320; // ~44s – Profile form (6 questions + regulatory analyzing phase)
 
-export const SCENE_2_START    = 1930;
-export const SCENE_2_DURATION = 180;  // 6s  – Wizard: Hero (slower reading time)
+export const SCENE_EXECUTING_START    = 1930;
+export const SCENE_EXECUTING_DURATION = 190; // ~6.3s – Executing the plan checklist (snappy)
 
-export const SCENE_3_START    = 2110;
+// SCENE_2 starts 20f BEFORE SceneExecutingPlan ends for a harmonious overlap transition
+export const SCENE_2_START    = 2100;
+export const SCENE_2_DURATION = 200;  // 6.6s – Wizard: Hero (extra 20f for the emerge-in)
+
+export const SCENE_3_START    = 2300;
 export const SCENE_3_DURATION = 180;  // 6s  – Wizard: Create Plant (step 1)
 
-export const SCENE_4_START    = 2290;
+export const SCENE_4_START    = 2480;
 export const SCENE_4_DURATION = 210;  // 7s  – Wizard: Upload docs (step 2)
 
-export const SCENE_5_START    = 2500;
+export const SCENE_5_START    = 2690;
 export const SCENE_5_DURATION = 150;  // 5s  – Wizard: AI Agents (step 3)
 
-export const SCENE_6_START    = 2650;
+export const SCENE_6_START    = 2840;
 export const SCENE_6_DURATION = 150;  // 5s  – Wizard: Complete (step 4)
 
-export const TOTAL_FRAMES_2   = 2800; // ~93s
+// Final checklist (items 7-10) with "AI tool suites" expansion at item 8
+export const SCENE_EXECUTING2_START    = 2990;
+export const SCENE_EXECUTING2_DURATION = 910; // ~30.3s (checks + hero "AriA is ready" reveal)
+
+// AriA dashboard working autonomously (for post-prod compositing onto monitor)
+export const SCENE_DASHBOARD_START     = 3900;
+export const SCENE_DASHBOARD_DURATION  = 1220; // ~40.7s (+ kanban board final beat)
+
+export const TOTAL_FRAMES_2   = 5120; // ~170s
 
 // AriA Design Tokens (exact from real software)
 export const ARIA_COLORS = {

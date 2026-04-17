@@ -14,6 +14,7 @@ import { TOTAL_FRAMES_BONUS, FPS as FPSBonus } from "./actbonus/constants";
 
 // ─── Act 1 — Individual scenes ──────────────────────────────────────────────
 import { Scene0Intro } from "./act1/scenes/Scene0Intro";
+import { SceneOpenCmms } from "./act1/scenes/SceneOpenCmms";
 import { Scene1WorkOrder } from "./act1/scenes/Scene1WorkOrder";
 import { Scene2ManutenzionePreventiva } from "./act1/scenes/Scene2ManutenzionePreventiva";
 import { Scene3bCost } from "./act1/scenes/Scene3bCost";
@@ -22,6 +23,7 @@ import { Scene3cLimits } from "./act1/scenes/Scene3cLimits";
 import { Scene4StopRewind } from "./act1/scenes/Scene4StopRewind";
 import {
   SCENE_0_DURATION,
+  SCENE_OPEN_CMMS_DURATION,
   SCENE_1_DURATION,
   SCENE_2_DURATION,
   SCENE_3B_DURATION,
@@ -51,15 +53,21 @@ import {
 import { Scene1LogoReveal } from "./act2/scenes/Scene1LogoReveal";
 import { SceneAreas } from "./act2/scenes/SceneAreas";
 import { SceneFormProfile } from "./act2/scenes/SceneFormProfile";
+import { SceneExecutingPlan } from "./act2/scenes/SceneExecutingPlan";
+import { SceneExecutingPlan2 } from "./act2/scenes/SceneExecutingPlan2";
 import { Scene2WizardHero } from "./act2/scenes/Scene2WizardHero";
 import { Scene3WizardPlant } from "./act2/scenes/Scene3WizardPlant";
 import { Scene4WizardUpload } from "./act2/scenes/Scene4WizardUpload";
 import { Scene5WizardAI } from "./act2/scenes/Scene5WizardAI";
 import { Scene6WizardComplete } from "./act2/scenes/Scene6WizardComplete";
+import { SceneDashboardAutonomous } from "./act2/scenes/SceneDashboardAutonomous";
 import {
   SCENE_1_DURATION as ACT2_S1_DUR,
   SCENE_AREAS_DURATION,
   SCENE_FORM_DURATION,
+  SCENE_EXECUTING_DURATION,
+  SCENE_EXECUTING2_DURATION,
+  SCENE_DASHBOARD_DURATION,
   SCENE_2_DURATION as ACT2_S2_DUR,
   SCENE_3_DURATION as ACT2_S3_DUR,
   SCENE_4_DURATION as ACT2_S4_DUR,
@@ -116,6 +124,14 @@ export const RemotionRoot: React.FC = () => {
         id="A1-S0-Intro"
         component={Scene0Intro}
         durationInFrames={SCENE_0_DURATION}
+        fps={FPS}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="A1-S0b-OpenCmms"
+        component={SceneOpenCmms}
+        durationInFrames={SCENE_OPEN_CMMS_DURATION}
         fps={FPS}
         width={1920}
         height={1080}
@@ -257,6 +273,22 @@ export const RemotionRoot: React.FC = () => {
         height={1080}
       />
       <Composition
+        id="A2-S3b-ExecutingPlan"
+        component={SceneExecutingPlan}
+        durationInFrames={SCENE_EXECUTING_DURATION}
+        fps={FPS2}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="A2-S3c-ExecutingPlan2"
+        component={SceneExecutingPlan2}
+        durationInFrames={SCENE_EXECUTING2_DURATION}
+        fps={FPS2}
+        width={1920}
+        height={1080}
+      />
+      <Composition
         id="A2-S4-WizardHero"
         component={Scene2WizardHero}
         durationInFrames={ACT2_S2_DUR}
@@ -292,6 +324,14 @@ export const RemotionRoot: React.FC = () => {
         id="A2-S8-WizardComplete"
         component={Scene6WizardComplete}
         durationInFrames={ACT2_S6_DUR}
+        fps={FPS2}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="A2-S9-DashboardAutonomous"
+        component={SceneDashboardAutonomous}
+        durationInFrames={SCENE_DASHBOARD_DURATION}
         fps={FPS2}
         width={1920}
         height={1080}

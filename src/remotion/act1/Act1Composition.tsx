@@ -1,7 +1,8 @@
 import React from "react";
 import { AbsoluteFill, Sequence } from "remotion";
-import { COLORS, SCENE_0_DURATION, SCENE_1_DURATION, SCENE_2_DURATION, SCENE_3_DURATION, SCENE_3B_DURATION, SCENE_3C_DURATION, SCENE_4_DURATION, SCENE_1_START, SCENE_2_START, SCENE_3_START, SCENE_3B_START, SCENE_3C_START, SCENE_4_START } from "./constants";
+import { COLORS, SCENE_0_DURATION, SCENE_OPEN_CMMS_START, SCENE_OPEN_CMMS_DURATION, SCENE_1_DURATION, SCENE_2_DURATION, SCENE_3_DURATION, SCENE_3B_DURATION, SCENE_3C_DURATION, SCENE_4_DURATION, SCENE_1_START, SCENE_2_START, SCENE_3_START, SCENE_3B_START, SCENE_3C_START, SCENE_4_START } from "./constants";
 import { Scene0Intro } from "./scenes/Scene0Intro";
+import { SceneOpenCmms } from "./scenes/SceneOpenCmms";
 import { Scene1WorkOrder } from "./scenes/Scene1WorkOrder";
 import { Scene2ManutenzionePreventiva } from "./scenes/Scene2ManutenzionePreventiva";
 import { Scene3PuntoRottura } from "./scenes/Scene3PuntoRottura";
@@ -14,6 +15,10 @@ export const Act1Composition: React.FC = () => {
     <AbsoluteFill style={{ backgroundColor: COLORS.bgLight }}>
       <Sequence from={0} durationInFrames={SCENE_0_DURATION} name="Scena0-Intro">
         <Scene0Intro />
+      </Sequence>
+
+      <Sequence from={SCENE_OPEN_CMMS_START} durationInFrames={SCENE_OPEN_CMMS_DURATION} name="Scena0b-AperturaGestionale">
+        <SceneOpenCmms />
       </Sequence>
 
       <Sequence from={SCENE_1_START} durationInFrames={SCENE_1_DURATION} name="Scena1-CreazioneWorkOrder">

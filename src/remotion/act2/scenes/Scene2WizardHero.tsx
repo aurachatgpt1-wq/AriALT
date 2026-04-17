@@ -37,9 +37,9 @@ const PILLARS = [
   },
 ];
 
-const P_HEADLINE = 10;
-const P_SUB      = 30;
-const P_PILLARS  = 45;
+const P_HEADLINE = 20;
+const P_SUB      = 36;
+const P_PILLARS  = 50;
 
 export const Scene2WizardHero: React.FC = () => {
   const frame = useCurrentFrame();
@@ -52,7 +52,7 @@ export const Scene2WizardHero: React.FC = () => {
   const subT = sp(P_SUB);
 
   return (
-    <WizardShell stepIndex={0} enterFrame={0}>
+    <WizardShell stepIndex={0} enterFrame={0} dramaticEntrance>
       <div style={{
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
         height: "100%", padding: "0 60px",
