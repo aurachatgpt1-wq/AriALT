@@ -52,7 +52,7 @@ const TAGLINE_HOLD_END   = TAGLINE_START + 60;                           // 399
 const TAGLINE2_START     = TAGLINE_HOLD_END + 14;                        // 413 — clean gap
 const TAGLINE2_HOLD_END  = TAGLINE2_START + 70;                          // 483
 const BLOB_MORPH_START   = TAGLINE2_HOLD_END;                            // 483
-const SCENE_END          = 520;
+const SCENE_END          = 505; // trimmed: blob clears frame ~503
 
 // Orbit layout
 const ORBIT_CX = 960;
@@ -142,9 +142,11 @@ export const SceneAreas: React.FC = () => {
     fps,
     config: { stiffness: 80, damping: 22, mass: 1.1 },
   });
-  const blobSize = interpolate(blobMorphT, [0, 1], [220, 120], clamp);
-  const blobCX   = interpolate(blobMorphT, [0, 1], [960, 622], clamp);
-  const blobCY   = interpolate(blobMorphT, [0, 1], [540, 540], clamp);
+  // Handoff to SceneBlobHold: blob rises straight up & exits frame,
+  // background stays untouched so the two scenes blend seamlessly.
+  const blobSize = interpolate(blobMorphT, [0, 1], [220, 180], clamp);
+  const blobCX   = 960;
+  const blobCY   = interpolate(blobMorphT, [0, 1], [540, -260], clamp);
   const tSec = frame / fps;
 
   // Blob pulse when pills merge into it
@@ -192,6 +194,9 @@ export const SceneAreas: React.FC = () => {
   // ── Second tagline: "Tailored by you. Without developers." ──
   const tag2ExitOp = interpolate(frame,
     [TAGLINE2_HOLD_END - 10, TAGLINE2_HOLD_END + 10], [1, 0], clamp);
+  // Text slides downward as it fades, creating a handoff into SceneBlobHold
+  const tag2ExitY = interpolate(frame,
+    [TAGLINE2_HOLD_END - 10, TAGLINE2_HOLD_END + 16], [0, 140], clamp);
 
   // Pulse glow ring
   const glowOp = interpolate(frame,
@@ -494,6 +499,8 @@ export const SceneAreas: React.FC = () => {
             top: 720,
             textAlign: "center",
             zIndex: 10,
+            transform: `translateY(${tag2ExitY}px)`,
+            willChange: "transform",
           }}>
             {/* "Any industry." — at title position, fades out */}
             <div style={{

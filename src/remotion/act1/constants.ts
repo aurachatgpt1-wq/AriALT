@@ -23,10 +23,10 @@ export const SCENE_3B_DURATION = 240; // 8s — cost of inefficiency
 export const SCENE_3_START = 720;
 export const SCENE_3_DURATION = 150; // 5s
 export const SCENE_3C_START = 870;
-export const SCENE_3C_DURATION = 270; // 9s — limits
-export const SCENE_4_START = 1140;
+export const SCENE_3C_DURATION = 247; // ~8.2s — rapid-fire limits (0.7s each) + fade + half-sec pause
+export const SCENE_4_START = 1117;
 export const SCENE_4_DURATION = 150; // 5s
-export const TOTAL_FRAMES = 1290; // 43s
+export const TOTAL_FRAMES = 1267; // ~42.2s
 
 // Scene 4 sub-phases
 export const FREEZE_DURATION = 45;

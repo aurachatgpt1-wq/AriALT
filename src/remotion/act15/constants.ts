@@ -18,7 +18,7 @@ export const SCENE_BRIDGE_DURATION = 735;
 
 export const SCENE_BRIDGELIST_DURATION = 330; // ~11s — curved list + zoom
 
-export const TOTAL_FRAMES_15 = 2290;
+export const TOTAL_FRAMES_15 = 2640;
 
 // ─── ChatGPT content ──────────────────────────────────────────────────────────
 export const GPT_USER_MSG =

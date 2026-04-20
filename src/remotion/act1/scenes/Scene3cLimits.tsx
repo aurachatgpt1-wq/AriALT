@@ -10,7 +10,7 @@ import { interFont } from "../constants";
 
 // ─── Timing (270f = 9s) ───────────────────────────────────────────────────────
 // Phase 1: "Okay, these tools are useful."  0  – 75f  (fade out 60–75)
-// Phase 2: "But still:" + list              70 – 270f
+// Phase 2: "But still:" + rapid-fire list   70 – 270f  (zoom-in + overheating bg)
 
 const LIST_ITEMS = [
   "Fragmented.",
@@ -20,8 +20,14 @@ const LIST_ITEMS = [
   "Not autonomous.",
 ];
 
-const LIST_START = 88;       // first item spring starts
-const LIST_STAGGER = 26;     // frames between each item
+const LIST_START  = 110;      // first item flashes in (~0.9s after "But still" settles)
+const ITEM_DUR    = 21;       // 0.7s each
+const LIST_END    = LIST_START + 5 * ITEM_DUR; // = 215, last item just shown
+const HEAT_START  = 100;
+const HEAT_END    = LIST_END; // heat peaks right as the last word is displayed
+const FADE_OUT_START = LIST_END + 2;  // 217
+const SCENE_END      = LIST_END + 17; // 232 — content fully faded
+// The remainder of SCENE_3C_DURATION is intentional blank pause before Scene4 (rewind).
 
 // ─── Phase 1 — statement ─────────────────────────────────────────────────────
 const Phase1: React.FC = () => {
@@ -71,10 +77,9 @@ const Phase1: React.FC = () => {
   );
 };
 
-// ─── Phase 2 — "But still:" + list (Apple minimalist) ──────────────────────
+// ─── Phase 2 — "But still:" + rapid-fire list ──────────────────────────────
 const Phase2: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
 
   const fadeIn = interpolate(frame, [68, 82], [0, 1], {
     extrapolateLeft: "clamp", extrapolateRight: "clamp",
@@ -82,56 +87,54 @@ const Phase2: React.FC = () => {
 
   if (frame < 66) return null;
 
+  // Find which item is currently on screen. Each flashes for ITEM_DUR frames,
+  // then is replaced instantly by the next. The last one stays until scene exit.
+  const afterStart = frame - LIST_START;
+  let activeIndex = -1;
+  if (afterStart >= 0) {
+    const idx = Math.floor(afterStart / ITEM_DUR);
+    activeIndex = Math.min(idx, LIST_ITEMS.length - 1);
+  }
+  const activeItem = activeIndex >= 0 ? LIST_ITEMS[activeIndex] : null;
+
+  // Label "But still" fades out as the first item flashes in
+  const labelOp = interpolate(frame, [LIST_START - 4, LIST_START + 2], [1, 0], {
+    extrapolateLeft: "clamp", extrapolateRight: "clamp",
+  });
+
   return (
     <AbsoluteFill style={{
       display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center",
       opacity: fadeIn, pointerEvents: "none",
     }}>
-      {/* "But still" label — centered, understated */}
-      <div style={{
-        fontFamily: interFont, fontSize: 28, fontWeight: 400,
-        color: "#86868B", letterSpacing: "0.02em",
-        marginBottom: 48, textTransform: "uppercase" as const,
-      }}>
-        But still
-      </div>
+      {/* "But still" label — fades out as first item arrives */}
+      {labelOp > 0.01 && (
+        <div style={{
+          position: "absolute",
+          fontFamily: interFont, fontSize: 28, fontWeight: 400,
+          color: "#86868B", letterSpacing: "0.02em",
+          textTransform: "uppercase" as const,
+          opacity: labelOp,
+        }}>
+          But still
+        </div>
+      )}
 
-      {/* Items — large, bold, centered, no icons */}
-      <div style={{
-        display: "flex", flexDirection: "column",
-        alignItems: "center", gap: 6,
-      }}>
-        {LIST_ITEMS.map((item, i) => {
-          const itemStart = LIST_START + i * LIST_STAGGER;
-          const t = spring({
-            frame: frame - itemStart,
-            fps,
-            config: { stiffness: 180, damping: 22, mass: 0.8 },
-          });
-          const op    = interpolate(t, [0, 1], [0, 1]);
-          const scale = interpolate(t, [0, 1], [0.92, 1]);
-          const ty    = interpolate(t, [0, 1], [24, 0]);
-
-          if (frame < itemStart - 3) return null;
-
-          return (
-            <div key={item} style={{
-              opacity: op,
-              transform: `translateY(${ty}px) scale(${scale})`,
-              fontFamily: interFont,
-              fontSize: 72,
-              fontWeight: 700,
-              color: "#1D1D1F",
-              letterSpacing: "-0.04em",
-              lineHeight: 1.25,
-              textAlign: "center" as const,
-            }}>
-              {item}
-            </div>
-          );
-        })}
-      </div>
+      {/* Current item — instant swap, no fade, centered */}
+      {activeItem && (
+        <div key={activeIndex} style={{
+          fontFamily: interFont,
+          fontSize: 96,
+          fontWeight: 800,
+          color: "#1D1D1F",
+          letterSpacing: "-0.04em",
+          lineHeight: 1,
+          textAlign: "center" as const,
+        }}>
+          {activeItem}
+        </div>
+      )}
     </AbsoluteFill>
   );
 };
@@ -140,17 +143,51 @@ const Phase2: React.FC = () => {
 export const Scene3cLimits: React.FC = () => {
   const frame = useCurrentFrame();
 
-  const sceneOp = interpolate(
-    frame,
-    [0, 10, 254, 270],
-    [0, 1,   1,   0],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-  );
+  const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
+
+  const sceneOp = interpolate(frame, [0, 10, FADE_OUT_START, SCENE_END], [0, 1, 1, 0], clamp);
+
+  // Progressive zoom throughout phase 2 (overheating crescendo)
+  const zoom = interpolate(frame, [HEAT_START, HEAT_END], [1, 1.45], clamp);
+
+  // Heat level 0→1 drives the red tint intensity
+  const heat = interpolate(frame, [HEAT_START, HEAT_END], [0, 1], clamp);
+
+  // Base bg shifts from cool #F5F5F7 toward a warm red-tinted hue
+  const bgColor = `rgb(${Math.round(245 + heat * 10)}, ${Math.round(245 - heat * 55)}, ${Math.round(247 - heat * 70)})`;
+
+  // Red radial haze — starts faint, intensifies
+  const hazeOp = interpolate(heat, [0, 1], [0, 0.55], clamp);
 
   return (
-    <AbsoluteFill style={{ backgroundColor: "#F5F5F7", opacity: sceneOp }}>
-      <Phase1 />
-      <Phase2 />
+    <AbsoluteFill style={{ backgroundColor: bgColor, opacity: sceneOp, overflow: "hidden" }}>
+      {/* Progressive zoom wrapper */}
+      <div style={{
+        position: "absolute", inset: 0,
+        transform: `scale(${zoom})`,
+        transformOrigin: "center center",
+        willChange: "transform",
+      }}>
+        <Phase1 />
+        <Phase2 />
+      </div>
+
+      {/* Overheating red radial wash — grows as the list progresses */}
+      <div style={{
+        position: "absolute", inset: 0,
+        background: "radial-gradient(ellipse at 50% 60%, rgba(230,60,40,0.55) 0%, rgba(220,40,30,0.25) 35%, transparent 70%)",
+        opacity: hazeOp,
+        mixBlendMode: "multiply",
+        pointerEvents: "none",
+      }} />
+
+      {/* Subtle vignette edge that deepens with heat */}
+      <div style={{
+        position: "absolute", inset: 0,
+        background: "radial-gradient(circle at 50% 50%, transparent 40%, rgba(140,30,20,0.35) 100%)",
+        opacity: hazeOp * 0.8,
+        pointerEvents: "none",
+      }} />
     </AbsoluteFill>
   );
 };

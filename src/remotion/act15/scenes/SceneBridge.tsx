@@ -119,7 +119,7 @@ export const SceneBridge: React.FC = () => {
 
   // ── Phase 1 — centered typewriter wrapping after "actually" → magic-move zoom-out ──
   const P1_TL1        = "What if AI actually";
-  const P1_TL2        = "know your infrastructure?";
+  const P1_TL2        = "knew your infrastructure?";
   const P1_WRAP_FRAME = T_TITLE_IN + P1_TL1.length;     // 25
   const P1_DONE_FRAME = P1_WRAP_FRAME + P1_TL2.length;  // 50
 

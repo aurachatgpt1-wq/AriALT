@@ -1,6 +1,7 @@
 import React from "react";
 import {
   AbsoluteFill,
+  Easing,
   interpolate,
   spring,
   useCurrentFrame,
@@ -8,196 +9,303 @@ import {
 } from "remotion";
 import { interFont } from "../constants";
 
-// ─── Config ───────────────────────────────────────────────────────────────────
-const ORB_SIZE  = 52;
-const CONTENT_W = 1100;
-const ROW_H     = 92;              // px per slot
-const MAX_ROWS  = 4;               // visible rows at once
-const CLIP_H    = ROW_H * MAX_ROWS;// 368px clipped window
-const ANCHOR_Y  = CLIP_H - ROW_H; // 276 — Y of the bottom (newest) row
+/* ─── SceneThreeProblems — Apple keynote, bg indipendente dal testo ─────────
+ *  Sfondo: layer separato che crossfade solo ai confini di gruppo (ogni 2 frasi).
+ *  Testo: ogni frase si dissolve in/out indipendentemente sul bg fermo.
+ *  Word-by-word Pattern A con accent handoff.
+ * ────────────────────────────────────────────────────────────────────────── */
 
-// Centered block
-const BLOCK_H    = ORB_SIZE + 36 + CLIP_H;    // 52+36+368 = 456
-const BLOCK_TOP  = (1080 - BLOCK_H) / 2;       // 312
-const BLOCK_LEFT = (1920 - CONTENT_W) / 2;     // 410
+const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 
-const ITEMS = [
-  { text: "Memory resets with every conversation", delay: 28  },
-  { text: "Context is generic, not yours",         delay: 66  },
-  { text: "Your data stays out of the loop",       delay: 104 },
-  { text: "No integration with your systems",      delay: 142 },
-  { text: "You still have to take the action",     delay: 180 },
+// ── Apple tokens ─────────────────────────────────────────────────────────────
+const APPLE_INK_LIGHT = "#1D1D1F";
+const APPLE_INK_DARK  = "#FFFFFF";
+const APPLE_PAPER     = "#F8F9FC";
+const APPLE_BLACK     = "#0A0B10";
+
+type Scheme = "dark" | "light" | "climax";
+
+interface Item {
+  text: string;
+  scheme: Scheme;
+}
+
+// ── Timing ───────────────────────────────────────────────────────────────────
+const PER_ITEM   = 38;  // frames per phrase
+const X_FADE     = 8;   // text crossfade overlap
+const BG_FADE    = 18;  // bg crossfade at group boundary (longer = smoother)
+const ZOOM_START = 215; // smash-zoom begins here
+const EXIT_FROM  = 256; // white flood complete — hand off to next scene
+const TOTAL      = 270;
+
+// Group 0 (dark): items 0-1, Group 1 (light): items 2-3, Group 2 (climax): item 4
+const BOUNDARY_01 = PER_ITEM * 2; // 76 — dark → light
+const BOUNDARY_12 = PER_ITEM * 4; // 152 — light → climax
+
+// Grouped items
+const ITEMS: Item[] = [
+  { text: "Memory resets with every conversation", scheme: "dark"   },
+  { text: "Context is generic, not yours",         scheme: "dark"   },
+  { text: "Your data stays out of the loop",       scheme: "light"  },
+  { text: "No integration with your systems",      scheme: "light"  },
+  { text: "You still have to take the action",     scheme: "climax" },
 ];
 
-// ─── Grey Orb ─────────────────────────────────────────────────────────────────
-const GreyOrb: React.FC<{ frame: number; fps: number }> = ({ frame, fps }) => {
-  const spin  = (frame / fps) * 30;
-  const pulse = 0.5 + 0.5 * Math.sin((frame / fps) * 1.4);
-  const glow  = ORB_SIZE * (1.06 + pulse * 0.05);
+// ── Text-only presence (bg is NOT tied to this) ───────────────────────────────
+const textPresence = (i: number, frame: number) => {
+  const start = i * PER_ITEM;
+  const end   = start + PER_ITEM;
+  const fadeIn  = interpolate(frame, [start - X_FADE, start], [0, 1], clamp);
+  if (i === ITEMS.length - 1) return fadeIn;
+  const fadeOut = interpolate(frame, [end - X_FADE, end], [1, 0], clamp);
+  return Math.min(fadeIn, fadeOut);
+};
+
+// ── Background layer — crossfades only at group boundaries ───────────────────
+const BgLayer: React.FC<{ frame: number }> = ({ frame }) => {
+  // t01: 0 = full dark, 1 = full light
+  const t01 = interpolate(
+    frame,
+    [BOUNDARY_01 - BG_FADE / 2, BOUNDARY_01 + BG_FADE / 2],
+    [0, 1],
+    clamp,
+  );
+  // t12: 0 = full light, 1 = full climax
+  const t12 = interpolate(
+    frame,
+    [BOUNDARY_12 - BG_FADE / 2, BOUNDARY_12 + BG_FADE / 2],
+    [0, 1],
+    clamp,
+  );
+
   return (
-    <div style={{ position: "relative", width: ORB_SIZE, height: ORB_SIZE, flexShrink: 0 }}>
+    <>
+      {/* Group 0 — dark */}
       <div style={{
-        position: "absolute", width: glow * 2, height: glow * 2, borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(156,163,175,0.28) 0%, transparent 60%)",
-        left: "50%", top: "50%", transform: "translate(-50%,-50%)", filter: "blur(14px)",
+        position: "absolute", inset: 0,
+        background: APPLE_BLACK,
+        opacity: 1 - t01,
       }} />
+
+      {/* Group 1 — light paper */}
       <div style={{
-        width: ORB_SIZE, height: ORB_SIZE, borderRadius: "50%",
-        background: `conic-gradient(from ${spin}deg, #9CA3AF, #C8CBD0, #D1D5DB, #B0B7C3, #9CA3AF)`,
-        boxShadow: `0 0 ${ORB_SIZE * 0.4}px rgba(156,163,175,0.45)`,
+        position: "absolute", inset: 0,
+        background: APPLE_PAPER,
+        opacity: t01 * (1 - t12),
       }} />
+
+      {/* Group 2 — climax radial dark */}
       <div style={{
-        position: "absolute", width: ORB_SIZE * 0.38, height: ORB_SIZE * 0.26, borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(255,255,255,0.26) 0%, transparent 70%)",
-        top: ORB_SIZE * 0.10, left: ORB_SIZE * 0.13,
+        position: "absolute", inset: 0,
+        background: "radial-gradient(ellipse at 50% 45%, #1A1C28 0%, #050610 65%)",
+        opacity: t12,
       }} />
+
+      {/* Climax accent glow (only visible when t12 > 0) */}
+      {t12 > 0.01 && (
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "radial-gradient(ellipse at 50% 50%, rgba(91,138,230,0.10) 0%, transparent 55%)",
+          opacity: t12,
+          pointerEvents: "none",
+        }} />
+      )}
+    </>
+  );
+};
+
+// ── Word-by-word reveal (Pattern A, accent handoff) ──────────────────────────
+const WordsReveal: React.FC<{
+  text: string;
+  localFrame: number;
+  fps: number;
+  scheme: Scheme;
+}> = ({ text, localFrame, fps, scheme }) => {
+  const words = text.split(" ");
+  const stagger    = 3;
+  const accentHold = 6;
+  const accentFade = 8;
+
+  const ink = scheme === "light" ? APPLE_INK_LIGHT : APPLE_INK_DARK;
+
+  // Per-group accent colors
+  const accentR = scheme === "light" ? 220 : scheme === "climax" ? 91 : 91;
+  const accentG = scheme === "light" ? 38  : scheme === "climax" ? 138 : 138;
+  const accentB = scheme === "light" ? 127 : 230;
+  const inkR = scheme === "light" ? 29  : 255;
+  const inkG = scheme === "light" ? 29  : 255;
+  const inkB = scheme === "light" ? 31  : 255;
+
+  const isClimax = scheme === "climax";
+
+  const charCount = text.length;
+  const baseSize  = charCount > 32 ? 76 : charCount > 28 ? 84 : 92;
+  const fontSize  = isClimax ? Math.min(baseSize + 12, 100) : baseSize;
+
+  return (
+    <div style={{
+      display: "flex", flexWrap: "nowrap", justifyContent: "center", gap: "0 22px",
+      maxWidth: 1800,
+    }}>
+      {words.map((w, i) => {
+        const start = i * stagger;
+        const sp = spring({
+          frame: localFrame - start,
+          fps,
+          config: { stiffness: 240, damping: 20, mass: 0.65 },
+        });
+        const op = interpolate(sp, [0, 1], [0, 1], clamp);
+        const ty = interpolate(sp, [0, 1], [22, 0], clamp);
+
+        const accentT = interpolate(
+          localFrame - start,
+          [accentHold, accentHold + accentFade],
+          [1, 0],
+          clamp,
+        );
+
+        const r = Math.round(accentR * accentT + inkR * (1 - accentT));
+        const g = Math.round(accentG * accentT + inkG * (1 - accentT));
+        const b = Math.round(accentB * accentT + inkB * (1 - accentT));
+        const color = accentT > 0.02 ? `rgb(${r},${g},${b})` : ink;
+
+        const glow = isClimax && accentT > 0.05
+          ? `0 0 ${22 * accentT}px rgba(91,138,230,${0.55 * accentT})`
+          : "none";
+
+        return (
+          <span key={i} style={{
+            display: "inline-block",
+            opacity: op,
+            transform: `translateY(${ty}px)`,
+            color,
+            textShadow: glow,
+            fontFamily: interFont,
+            fontSize,
+            fontWeight: 800,
+            letterSpacing: "-0.04em",
+            whiteSpace: "nowrap",
+          }}>
+            {w}
+          </span>
+        );
+      })}
     </div>
   );
 };
 
-// ─── Red X circle ─────────────────────────────────────────────────────────────
-const XCircle: React.FC<{ size?: number }> = ({ size = 42 }) => (
-  <div style={{
-    width: size, height: size, borderRadius: "50%", flexShrink: 0,
-    backgroundColor: "rgba(220,38,38,0.09)",
-    display: "flex", alignItems: "center", justifyContent: "center",
-  }}>
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-      <line x1="2" y1="2" x2="11" y2="11" stroke="#DC2626" strokeWidth="2" strokeLinecap="round"/>
-      <line x1="11" y1="2" x2="2" y2="11" stroke="#DC2626" strokeWidth="2" strokeLinecap="round"/>
-    </svg>
-  </div>
-);
+// ── Card — text + dots only (NO background here) ─────────────────────────────
+const Card: React.FC<{
+  item: Item;
+  index: number;
+  frame: number;
+  fps: number;
+}> = ({ item, index, frame, fps }) => {
+  const op = textPresence(index, frame);
+  if (op <= 0.001) return null;
 
-// ─── Scene ────────────────────────────────────────────────────────────────────
+  const localFrame = frame - index * PER_ITEM;
+  const isLast = index === ITEMS.length - 1;
+
+  // Last item: the zoom is applied directly here so there is only ONE text
+  // element on screen during the smash-zoom — no snap between two renderers.
+  let textScale = 1;
+  let textOp    = 1;
+  let dotsOp    = 1;
+  if (isLast && frame >= ZOOM_START) {
+    const t = interpolate(frame, [ZOOM_START, EXIT_FROM], [0, 1], {
+      easing: Easing.in(Easing.cubic),
+      ...clamp,
+    });
+    textScale = interpolate(t, [0, 1], [1, 5], clamp);
+    textOp    = interpolate(t, [0.55, 0.85], [1, 0], clamp);
+    dotsOp    = interpolate(frame, [ZOOM_START, ZOOM_START + 6], [1, 0], clamp);
+  }
+
+  return (
+    <AbsoluteFill style={{ opacity: op }}>
+      {/* Text — centered; zoom applied inline for last item */}
+      <div style={{
+        position: "absolute",
+        inset: 0,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "0 80px",
+        transform: `scale(${textScale})`,
+        opacity: textOp,
+      }}>
+        <WordsReveal text={item.text} localFrame={localFrame} fps={fps} scheme={item.scheme} />
+      </div>
+
+      {/* Progress dots */}
+      <div style={{
+        position: "absolute",
+        bottom: 80, left: 0, right: 0,
+        display: "flex", justifyContent: "center", gap: 14,
+        opacity: dotsOp,
+      }}>
+        {ITEMS.map((_, dIdx) => {
+          const active = dIdx === index;
+          const dotColor = item.scheme === "light"
+            ? (active ? APPLE_INK_LIGHT : "#D1D5DB")
+            : (active ? APPLE_INK_DARK : "#3A3D45");
+          return (
+            <div key={dIdx} style={{
+              width: active ? 28 : 8,
+              height: 8,
+              borderRadius: 4,
+              background: dotColor,
+            }} />
+          );
+        })}
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+// ── White flood overlay ───────────────────────────────────────────────────────
+// The zoom is now handled inside the last Card — this overlay only provides
+// the white flood that hands off to SceneFasterStill's background.
+const ZoomExitOverlay: React.FC<{ frame: number }> = ({ frame }) => {
+  if (frame < ZOOM_START) return null;
+
+  const t = interpolate(frame, [ZOOM_START, EXIT_FROM], [0, 1], {
+    easing: Easing.in(Easing.cubic),
+    ...clamp,
+  });
+
+  const whiteOp = interpolate(t, [0.3, 1], [0, 1], {
+    easing: Easing.out(Easing.quad),
+    ...clamp,
+  });
+
+  return (
+    <AbsoluteFill style={{ pointerEvents: "none" }}>
+      <div style={{
+        position: "absolute", inset: 0,
+        background: "#FFFFFF",
+        opacity: whiteOp,
+      }} />
+    </AbsoluteFill>
+  );
+};
+
+// ── Scene ────────────────────────────────────────────────────────────────────
 export const SceneThreeProblems: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const sp = (f: number, s = 300, d = 26, m = 0.6) =>
-    spring({ frame: frame - f, fps, config: { stiffness: s, damping: d, mass: m } });
-
-  const globalOut = interpolate(frame, [256, 270], [1, 0], {
-    extrapolateLeft: "clamp", extrapolateRight: "clamp",
-  });
-
-  // Orb entrance
-  const orbEnter = sp(4, 360, 20, 0.5);
-
-  // Scroll offset: each item after the first pushes the stack up by ROW_H
-  const scrollY = ITEMS.reduce((acc, item, i) => {
-    if (i === 0) return acc;
-    return acc + spring({
-      frame: frame - item.delay,
-      fps,
-      config: { stiffness: 200, damping: 28, mass: 0.85 },
-    }) * ROW_H;
-  }, 0);
-
   return (
-    <AbsoluteFill style={{ backgroundColor: "#F8F9FC", opacity: globalOut }}>
+    <AbsoluteFill>
+      {/* Background — independent layer, changes only at group boundaries */}
+      <BgLayer frame={frame} />
 
-      <div style={{
-        position: "absolute",
-        top: BLOCK_TOP,
-        left: BLOCK_LEFT,
-        width: CONTENT_W,
-        height: BLOCK_H,
-      }}>
+      {/* Text cards — dissolve in/out per phrase, bg stays still */}
+      {ITEMS.map((item, i) => (
+        <Card key={i} item={item} index={i} frame={frame} fps={fps} />
+      ))}
 
-        {/* ── Orb row ── */}
-        <div style={{
-          display: "flex", alignItems: "center", gap: 16,
-          height: ORB_SIZE, marginBottom: 36,
-          opacity: interpolate(orbEnter, [0, 1], [0, 1]),
-          transform: `translateY(${interpolate(orbEnter, [0, 1], [10, 0])}px)`,
-        }}>
-          <GreyOrb frame={frame} fps={fps} />
-          <span style={{
-            fontFamily: interFont, fontSize: 24, fontWeight: 600,
-            color: "#9CA3AF", letterSpacing: "-0.01em",
-          }}>
-            Generic AI
-          </span>
-        </div>
-
-        {/* ── Clipped list window ── */}
-        <div style={{
-          position: "relative",
-          height: CLIP_H,
-          overflow: "hidden",
-        }}>
-
-          {/* Top-of-window fade — hides items scrolling off the top */}
-          <div style={{
-            position: "absolute", top: 0, left: 0, right: 0,
-            height: ROW_H * 1.6,
-            background: "linear-gradient(to bottom, #F8F9FC 0%, rgba(248,249,252,0) 100%)",
-            zIndex: 10, pointerEvents: "none",
-          }} />
-
-          {ITEMS.map((item, i) => {
-            // Skip until 8 frames before this item's entry
-            if (frame < item.delay - 8) return null;
-
-            // Entry animation spring (per-item)
-            const entryT  = sp(item.delay, 320, 26, 0.5);
-            const slideIn  = interpolate(entryT, [0, 1], [32, 0]);
-            const fadeIn   = interpolate(entryT, [0, 1], [0, 1]);
-
-            // Slot: 0 = bottom (newest), grows as item scrolls up
-            const slot = scrollY / ROW_H - i;
-
-            // Y position within the clip window
-            const posY = ANCHOR_Y + i * ROW_H - scrollY;
-
-            // Font size: large at bottom, shrinks as item rises
-            const fontSize = interpolate(
-              slot, [0, 1, 2, 3],
-              [46, 37, 30, 25],
-              { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-            );
-
-            // Icon size: also shrinks with depth
-            const iconSize = Math.round(interpolate(
-              slot, [0, 1, 2, 3],
-              [42, 36, 30, 25],
-              { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-            ));
-
-            // Opacity: fades as it rises
-            const depthAlpha = interpolate(
-              slot, [0, 0.4, 1.4, 2.4, 3.2],
-              [1,   1,   0.55, 0.2, 0.05],
-              { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-            );
-
-            return (
-              <div key={item.text} style={{
-                position: "absolute",
-                top: posY + slideIn,
-                left: 0, right: 0,
-                height: ROW_H,
-                display: "flex", alignItems: "center", gap: 18,
-                opacity: fadeIn * depthAlpha,
-              }}>
-                <XCircle size={iconSize} />
-                <span style={{
-                  fontFamily: interFont,
-                  fontSize,
-                  fontWeight: 500,
-                  color: "#1D1D1F",
-                  letterSpacing: "-0.02em",
-                  lineHeight: 1.2,
-                }}>
-                  {item.text}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
+      {/* Smash-zoom exit: last phrase grows toward camera → white flood */}
+      <ZoomExitOverlay frame={frame} />
     </AbsoluteFill>
   );
 };

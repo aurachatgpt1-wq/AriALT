@@ -31,10 +31,10 @@ export const Act15Composition: React.FC = () => {
           <SceneChatGPTFull />
         </TransitionSeries.Sequence>
 
-        {/* → SceneThreeProblems: fade, 20 frames */}
+        {/* → SceneThreeProblems: snappy 6-frame fade (avoid mid-scene overlap) */}
         <TransitionSeries.Transition
           presentation={fade()}
-          timing={linearTiming({ durationInFrames: 20 })}
+          timing={linearTiming({ durationInFrames: 6 })}
         />
 
         {/* SceneThreeProblems — 270 frames */}
@@ -42,14 +42,14 @@ export const Act15Composition: React.FC = () => {
           <SceneThreeProblems />
         </TransitionSeries.Sequence>
 
-        {/* → SceneFasterStill: fade, 20 frames */}
+        {/* → SceneFasterStill: longer fade so "Faster" emerges from the white flood */}
         <TransitionSeries.Transition
           presentation={fade()}
           timing={linearTiming({ durationInFrames: 20 })}
         />
 
-        {/* SceneFasterStill — 270 frames */}
-        <TransitionSeries.Sequence durationInFrames={270}>
+        {/* SceneFasterStill — 300 frames (extended for Phase 2 dark section) */}
+        <TransitionSeries.Sequence durationInFrames={300}>
           <SceneFasterStill />
         </TransitionSeries.Sequence>
 
@@ -70,8 +70,8 @@ export const Act15Composition: React.FC = () => {
           timing={linearTiming({ durationInFrames: 25 })}
         />
 
-        {/* SceneBridgeList — 330 frames (~11s) */}
-        <TransitionSeries.Sequence durationInFrames={330}>
+        {/* SceneBridgeList — 725 frames (~24s): title + 3 dark-blue phases + list */}
+        <TransitionSeries.Sequence durationInFrames={725}>
           <SceneBridgeList />
         </TransitionSeries.Sequence>
 
