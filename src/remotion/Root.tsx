@@ -54,6 +54,9 @@ import { Scene3WizardPlant } from "./act2/scenes/Scene3WizardPlant";
 import { Scene4WizardUpload } from "./act2/scenes/Scene4WizardUpload";
 import { Scene5WizardAI } from "./act2/scenes/Scene5WizardAI";
 import { Scene6WizardComplete } from "./act2/scenes/Scene6WizardComplete";
+import { SceneWorkOrderExecCinema } from "./act2/scenes/SceneWorkOrderExecCinema";
+import { SceneAlarmListCinema, ALARM_CINEMA_DURATION } from "./act2/scenes/SceneAlarmListCinema";
+import { SceneAgentCMMSCinema } from "./act2/scenes/SceneAgentCMMSCinema";
 import {
   SCENE_1_DURATION as ACT2_S1_DUR,
   SCENE_AREAS_DURATION,
@@ -282,6 +285,36 @@ export const RemotionRoot: React.FC = () => {
         id="A2-S8-WizardComplete"
         component={Scene6WizardComplete}
         durationInFrames={ACT2_S6_DUR}
+        fps={FPS2}
+        width={1920}
+        height={1080}
+      />
+
+      {/* ─── PILOT: Cinema redesign of Work Order Exec ───────────────── */}
+      <Composition
+        id="A2-Cinema-WorkOrder"
+        component={SceneWorkOrderExecCinema}
+        durationInFrames={270}
+        fps={FPS2}
+        width={1920}
+        height={1080}
+      />
+
+      {/* ─── PILOT: Cinema redesign of Alarm List ────────────────────── */}
+      <Composition
+        id="A2-Cinema-AlarmList"
+        component={SceneAlarmListCinema}
+        durationInFrames={ALARM_CINEMA_DURATION}
+        fps={FPS2}
+        width={1920}
+        height={1080}
+      />
+
+      {/* ─── PILOT: Cinema duplicate of SceneAgentCMMS (WIP iteration) ── */}
+      <Composition
+        id="A2-Cinema-AgentCMMS"
+        component={SceneAgentCMMSCinema}
+        durationInFrames={1140}
         fps={FPS2}
         width={1920}
         height={1080}

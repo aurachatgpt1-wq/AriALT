@@ -28,7 +28,7 @@ import { Scene1LogoReveal }       from "./scenes/Scene1LogoReveal";
 import { SceneAreas }             from "./scenes/SceneAreas";
 import { SceneAgentCMMS }         from "./scenes/SceneAgentCMMS";
 import { SceneKanbanRouting }     from "./scenes/SceneKanbanRouting";
-import { SceneWorkOrderExec }     from "./scenes/SceneWorkOrderExec";
+import { SceneWorkOrderExecCinema } from "./scenes/SceneWorkOrderExecCinema";
 import { SceneBlobHold }          from "./scenes/SceneBlobHold";
 import { SceneFormProfile }       from "./scenes/SceneFormProfile";
 import { Scene2WizardHero }       from "./scenes/Scene2WizardHero";
@@ -54,7 +54,7 @@ export const Act2Composition: React.FC = () => {
             - SceneKanbanRouting                  → between Seq 3 and Seq 4
           The WorkOrder exec scene plays directly after SceneAreas now. */}
       <Sequence from={SCENE_WO_EXEC_START} durationInFrames={SCENE_WO_EXEC_DURATION}>
-        <SceneWorkOrderExec />
+        <SceneWorkOrderExecCinema />
       </Sequence>
       {/* BlobHold Part 1 — up through "Up to 38% lower operating costs" */}
       <Sequence

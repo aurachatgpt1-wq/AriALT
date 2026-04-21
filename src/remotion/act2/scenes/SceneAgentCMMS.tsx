@@ -7,7 +7,7 @@ import {
   useVideoConfig,
   Easing,
 } from "remotion";
-import { geistFont, ARIA_COLORS, ARIA_RADIUS, ARIA_SHADOWS } from "../constants";
+import { geistFont, ARIA_COLORS, ARIA_SHADOWS } from "../constants";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SceneAgentCMMS — AriA agent works a Torque safety incident in real-time.
@@ -35,28 +35,29 @@ const APPLE_ACCENT = "#3B5BDB";
 const INK = ARIA_COLORS.foreground;
 const MUTED = ARIA_COLORS.mutedFg;
 const LABEL = ARIA_COLORS.labelFg;
-const PAGE_BG = "#F3F4F7";
+const PAGE_BG = "#F7F8FC";
 const PANEL_BG = "#FFFFFF";
-const PANEL_BORDER = "rgba(214,217,227,0.8)";
+const PANEL_BORDER = "rgba(214,217,227,0.7)";
 const FIELD_BG = "#FAFBFD";
 const FIELD_BORDER = "rgba(214,217,227,0.9)";
+const CARD_SHADOW = "0 2px 14px rgba(15,20,40,0.055), 0 1px 3px rgba(15,20,40,0.035)";
 
 // ─── Layout constants (absolute coordinates within 1920×1080) ───────────────
-// Centered stack: search → filter chips → "5 ACTIVE" label → 5 cards
-const CARD_W = 420;
-const CARD_H = 118;
-const CARD_STRIDE = 126;
-const CARD_X = Math.round((1920 - CARD_W) / 2); // 750 — horizontally centered
-const SEARCH_H = 44;
-const CHIPS_H = 34;
+// Full-width stack: search → filter chips → "5 ACTIVE" label → 5 cards
+const CARD_W = 1600;
+const CARD_H = 100;
+const CARD_STRIDE = 114;
+const CARD_X = Math.round((1920 - CARD_W) / 2); // 160
+const SEARCH_H = 48;
+const CHIPS_H = 36;
 const LABEL_H = 18;
-const CHROME_BLOCK_H = SEARCH_H + 12 + CHIPS_H + 10 + LABEL_H + 12; // 130
-const STACK_H = CHROME_BLOCK_H + 5 * CARD_STRIDE - 8; // 752
-const STACK_TOP = Math.round((1080 - STACK_H) / 2); // ≈ 164
+const CHROME_BLOCK_H = SEARCH_H + 12 + CHIPS_H + 10 + LABEL_H + 12; // 136
+const STACK_H = CHROME_BLOCK_H + 5 * CARD_STRIDE - 8; // 698
+const STACK_TOP = Math.round((1080 - STACK_H) / 2); // ≈ 191
 const SEARCH_Y = STACK_TOP;
 const CHIPS_Y  = SEARCH_Y + SEARCH_H + 12;
 const LABEL_Y  = CHIPS_Y + CHIPS_H + 10;
-const CARD1_TOP = LABEL_Y + LABEL_H + 12; // 294
+const CARD1_TOP = LABEL_Y + LABEL_H + 12; // ≈ 329
 // Panel slot (after flip — panel takes most of screen, slim sidebar gone)
 const PANEL_X = 80;
 const PANEL_Y = 60;
@@ -164,35 +165,67 @@ const SpinnerIcon: React.FC<{ frame: number; size?: number; color?: string }> = 
   );
 };
 
-// ─── Alarm card content (fills its parent 100%) ──────────────────────────────
-const AlarmCardBody: React.FC<{ alarm: Alarm; active: boolean }> = ({ alarm, active }) => {
-  const sevColor = alarm.sev === "critical" ? ARIA_COLORS.critical : alarm.sev === "warning" ? ARIA_COLORS.warning : "#6B7280";
-  const sevBg    = alarm.sev === "critical" ? ARIA_COLORS.criticalMuted : alarm.sev === "warning" ? ARIA_COLORS.warningMuted : "#EEF0F4";
-  const sevBorder= alarm.sev === "critical" ? ARIA_COLORS.criticalBorder : alarm.sev === "warning" ? ARIA_COLORS.warningBorder : "#D9DDE4";
+// ─── Alarm card — full-width cinema style ────────────────────────────────────
+const AlarmCardBody: React.FC<{ alarm: Alarm; active: boolean; frame?: number }> = ({ alarm, active, frame = 0 }) => {
+  const sevColor  = alarm.sev === "critical" ? ARIA_COLORS.critical : alarm.sev === "warning" ? ARIA_COLORS.warning : "#6B7280";
+  const sevBg     = alarm.sev === "critical" ? "rgba(229,57,53,0.08)"  : alarm.sev === "warning" ? "rgba(232,131,10,0.08)"  : "rgba(107,114,128,0.06)";
+  const sevBorder = alarm.sev === "critical" ? "rgba(229,57,53,0.22)"  : alarm.sev === "warning" ? "rgba(232,131,10,0.22)"  : "rgba(214,217,227,0.55)";
+  const pulse = active ? 0.62 + 0.38 * Math.sin(frame * 0.13) : 0;
+
   return (
     <div style={{
       width: "100%", height: "100%",
-      background: active ? "#FFFFFF" : "rgba(255,255,255,0.55)",
-      border: `1.5px solid ${active ? APPLE_ACCENT : "rgba(214,217,227,0.8)"}`,
-      borderLeft: active ? `3px solid ${APPLE_ACCENT}` : `3px solid transparent`,
-      borderRadius: ARIA_RADIUS.md,
-      padding: "12px 14px",
-      boxShadow: active ? "0 4px 16px -4px rgba(59,91,219,0.18)" : "0 1px 3px rgba(100,110,130,0.05)",
+      background: PANEL_BG,
+      border: `1px solid ${active ? `rgba(59,91,219,${0.25 + pulse * 0.45})` : "rgba(214,217,227,0.55)"}`,
+      borderLeft: `4px solid ${sevColor}`,
+      borderRadius: 18,
+      padding: "0 40px",
       boxSizing: "border-box",
-      display: "flex", flexDirection: "column",
+      boxShadow: active
+        ? `0 0 0 1px rgba(59,91,219,${pulse * 0.12}), 0 8px 32px rgba(59,91,219,${pulse * 0.09}), ${CARD_SHADOW}`
+        : CARD_SHADOW,
+      display: "flex", alignItems: "center", gap: 24,
+      overflow: "hidden", position: "relative",
     }}>
-      <div style={{ fontSize: 11, color: LABEL, letterSpacing: "0.02em", fontFamily: geistFont }}>{alarm.code}</div>
+      {/* Severity dot */}
       <div style={{
-        fontSize: 13, color: INK, fontFamily: geistFont, fontWeight: 500,
-        lineHeight: 1.35, marginTop: 4,
-        display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
-      }}>
-        {alarm.title}
+        width: 10, height: 10, borderRadius: "50%",
+        backgroundColor: sevColor, flexShrink: 0,
+        boxShadow: alarm.sev === "critical" ? `0 0 ${6 + pulse * 14}px ${sevColor}` : "none",
+      }} />
+
+      {/* Code + Title */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4, minWidth: 0 }}>
+        <span style={{ fontFamily: geistFont, fontSize: 11.5, color: LABEL, letterSpacing: "0.07em", fontWeight: 500 }}>
+          {alarm.code}
+        </span>
+        <span style={{
+          fontFamily: geistFont, fontSize: 26, fontWeight: 600,
+          color: INK, letterSpacing: "-0.025em", lineHeight: 1.1,
+          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+        }}>
+          {alarm.title}
+        </span>
       </div>
-      <div style={{ display: "flex", gap: 6, marginTop: "auto", paddingTop: 8 }}>
-        <span style={{ fontSize: 11, padding: "3px 9px", borderRadius: 999, background: "#EEF0F4", color: MUTED, fontFamily: geistFont }}>{alarm.tag}</span>
-        <span style={{ fontSize: 11, padding: "3px 9px", borderRadius: 999, background: sevBg, color: sevColor, border: `1px solid ${sevBorder}`, fontFamily: geistFont, fontWeight: 500 }}>{alarm.sevLabel}</span>
-        <span style={{ fontSize: 11, padding: "3px 9px", borderRadius: 999, background: "#EEF0F4", color: MUTED, fontFamily: geistFont }}>Draft</span>
+
+      {/* Right: tag + severity + status */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+        <span style={{
+          fontFamily: geistFont, fontSize: 12, fontWeight: 500,
+          padding: "5px 13px", borderRadius: 999,
+          background: "#ECEDF2", color: MUTED,
+        }}>{alarm.tag}</span>
+        <span style={{
+          fontFamily: geistFont, fontSize: 12, fontWeight: 600,
+          padding: "5px 13px", borderRadius: 999,
+          color: sevColor, background: sevBg,
+          border: `1px solid ${sevBorder}`,
+        }}>{alarm.sevLabel}</span>
+        <span style={{
+          fontFamily: geistFont, fontSize: 12, fontWeight: 500,
+          padding: "5px 13px", borderRadius: 999,
+          background: "#ECEDF2", color: MUTED,
+        }}>Draft</span>
       </div>
     </div>
   );
@@ -1086,10 +1119,16 @@ export const SceneAgentCMMS: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ background: PAGE_BG, opacity: sceneOp, overflow: "hidden" }}>
+      {/* Ambient background blobs */}
       <div style={{
-        position: "absolute", inset: 0,
-        background: "radial-gradient(ellipse at 50% 20%, rgba(59,91,219,0.05) 0%, transparent 55%)",
-        pointerEvents: "none",
+        position: "absolute", width: 900, height: 700, borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(59,91,219,0.07) 0%, transparent 65%)",
+        left: -220, top: -120, filter: "blur(90px)", pointerEvents: "none",
+      }} />
+      <div style={{
+        position: "absolute", width: 700, height: 600, borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(59,91,219,0.05) 0%, transparent 65%)",
+        right: -100, bottom: -80, filter: "blur(90px)", pointerEvents: "none",
       }} />
 
       {/* CAMERA WRAPPER
@@ -1103,17 +1142,20 @@ export const SceneAgentCMMS: React.FC = () => {
         willChange: "transform",
       }}>
 
-        {/* ── SEARCH BAR (enters first, fades out at flip) ── */}
+        {/* ── SEARCH BAR ── */}
         <div style={{
           position: "absolute", left: CARD_X, top: SEARCH_Y, width: CARD_W, height: SEARCH_H,
           transform: `translateY(${stackRise + searchE.ty + chromeExitTy}px)`,
           opacity: searchE.op * chromeExitOp,
-          display: "flex", alignItems: "center", gap: 8,
+          display: "flex", alignItems: "center", gap: 10,
           background: "#FFFFFF", border: `1px solid ${PANEL_BORDER}`,
-          borderRadius: 10, padding: "0 14px", boxSizing: "border-box",
+          borderRadius: 14, padding: "0 20px", boxSizing: "border-box",
+          boxShadow: CARD_SHADOW,
         }}>
-          <SearchIcon />
-          <span style={{ fontSize: 13, color: LABEL, fontFamily: geistFont }}>Search by code, asset…</span>
+          <SearchIcon size={16} />
+          <span style={{ fontSize: 14, color: LABEL, fontFamily: geistFont, letterSpacing: "-0.005em" }}>
+            Search by code, asset…
+          </span>
         </div>
 
         {/* ── FILTER CHIPS ── */}
@@ -1121,14 +1163,19 @@ export const SceneAgentCMMS: React.FC = () => {
           position: "absolute", left: CARD_X, top: CHIPS_Y, width: CARD_W, height: CHIPS_H,
           transform: `translateY(${stackRise + chipsE.ty + chromeExitTy}px)`,
           opacity: chipsE.op * chromeExitOp,
-          display: "flex", alignItems: "center", gap: 6,
+          display: "flex", alignItems: "center", gap: 8,
         }}>
-          {[{ l: "Category Torque", active: true }, { l: "Over", active: false }, { l: "Priority", active: false }].map((c, i) => (
+          {[
+            { l: "Category Torque", active: true },
+            { l: "Over",            active: false },
+            { l: "Priority",        active: false },
+          ].map((c, i) => (
             <span key={i} style={{
-              fontSize: 12, padding: "6px 12px", borderRadius: 999, fontFamily: geistFont, fontWeight: 500,
+              fontSize: 13, padding: "7px 16px", borderRadius: 999,
+              fontFamily: geistFont, fontWeight: 500,
               background: c.active ? "rgba(59,91,219,0.08)" : "#FFFFFF",
               color: c.active ? APPLE_ACCENT : MUTED,
-              border: `1px solid ${c.active ? "rgba(59,91,219,0.3)" : PANEL_BORDER}`,
+              border: `1px solid ${c.active ? "rgba(59,91,219,0.28)" : PANEL_BORDER}`,
             }}>{c.l}</span>
           ))}
         </div>
@@ -1138,24 +1185,29 @@ export const SceneAgentCMMS: React.FC = () => {
           position: "absolute", left: CARD_X, top: LABEL_Y, width: CARD_W, height: LABEL_H,
           transform: `translateY(${stackRise + labelE.ty + chromeExitTy}px)`,
           opacity: labelE.op * chromeExitOp,
-          fontSize: 11, letterSpacing: "0.14em", fontFamily: geistFont, color: LABEL,
-          textTransform: "uppercase", fontWeight: 600,
+          display: "flex", alignItems: "center", gap: 14,
         }}>
-          5 Active
+          <span style={{
+            fontSize: 12, letterSpacing: "0.14em", fontFamily: geistFont,
+            color: LABEL, textTransform: "uppercase", fontWeight: 700,
+          }}>5 Active</span>
+          <div style={{ flex: 1, height: 1, background: "rgba(214,217,227,0.6)" }} />
+          <span style={{ fontSize: 12, color: MUTED, fontFamily: geistFont }}>Torque · Priority</span>
         </div>
 
-        {/* ── CARDS 2-5 (centered stack, slide up from viewport bottom; fade+slide down on exit) ── */}
+        {/* ── CARDS 2-5 — tilt-reveal entry, fade+slide exit ── */}
         {ALARMS.slice(1).map((alarm, i) => {
           const idx = i + 1;
           const finalTop = CARD1_TOP + idx * CARD_STRIDE;
-          // Chrome occupies stagger indices 0-2; card 1 is index 3; cards 2-5 are 4,5,6,7.
-          const sp = spring({ frame: frame - entryAt(3 + idx), fps, config: { stiffness: 200, damping: 22, mass: 0.7 } });
-          const entryOp = interpolate(sp, [0, 1], [0, 1], CLAMP);
-          const entryTy = interpolate(sp, [0, 1], [24, 0], CLAMP);
+          const sp = spring({ frame: frame - entryAt(3 + idx), fps, config: { stiffness: 180, damping: 22, mass: 0.85 } });
+          const entryOp  = interpolate(sp, [0, 1], [0, 1], CLAMP);
+          const entryTy  = interpolate(sp, [0, 1], [28, 0], CLAMP);
+          const rotX     = interpolate(sp, [0, 1], [20, 0], CLAMP);
+          const entryScl = interpolate(sp, [0, 1], [0.92, 1], CLAMP);
 
-          const exitF = EXIT_START + idx * 2;
-          const exitT = interpolate(frame, [exitF, exitF + 22], [0, 1], CLAMP);
-          const exitTy = interpolate(exitT, [0, 1], [0, 60], { ...CLAMP, easing: EASE });
+          const exitF  = EXIT_START + idx * 2;
+          const exitT  = interpolate(frame, [exitF, exitF + 22], [0, 1], CLAMP);
+          const exitTy = interpolate(exitT, [0, 1], [0, 56], { ...CLAMP, easing: EASE });
           const exitOp = interpolate(exitT, [0, 1], [1, 0], CLAMP);
 
           return (
@@ -1165,20 +1217,31 @@ export const SceneAgentCMMS: React.FC = () => {
               width: CARD_W, height: CARD_H,
               transform: `translateY(${stackRise + entryTy + exitTy}px)`,
               opacity: entryOp * exitOp,
+              perspective: 1100,
             }}>
-              <AlarmCardBody alarm={alarm} active={false} />
+              <div style={{
+                width: "100%", height: "100%",
+                transform: `rotateX(${rotX * (1 - exitT)}deg) scale(${entryScl})`,
+                transformOrigin: "50% 0%",
+              }}>
+                <AlarmCardBody alarm={alarm} active={false} frame={frame} />
+              </div>
             </div>
           );
         })}
 
         {/* ── FLIP WRAPPER: card 1 → detail panel ── */}
+        {/* Tilt-reveal on card 1 entry, resets before the flip starts */}
+        {(() => {
+          const card1RotX = interpolate(card1E.op, [0, 1], [20, 0], CLAMP) * (1 - flipT);
+          return (
         <div style={{
           position: "absolute",
           left: wrapLeft, top: wrapTop, width: wrapWidth, height: wrapHeight,
           transformStyle: "preserve-3d",
           perspective: 2800,
           opacity: card1E.op,
-          transform: `translateY(${(stackRise + card1E.ty) * (1 - flipT)}px)`,
+          transform: `translateY(${(stackRise + card1E.ty) * (1 - flipT)}px) rotateX(${card1RotX}deg)`,
         }}>
           <div style={{
             position: "absolute", inset: 0,
@@ -1192,7 +1255,7 @@ export const SceneAgentCMMS: React.FC = () => {
               WebkitBackfaceVisibility: "hidden",
               opacity: cardFaceOp,
             }}>
-              <AlarmCardBody alarm={ALARMS[0]} active={true} />
+              <AlarmCardBody alarm={ALARMS[0]} active={true} frame={frame} />
             </div>
             {/* Panel face */}
             <div style={{
@@ -1218,6 +1281,8 @@ export const SceneAgentCMMS: React.FC = () => {
             </div>
           </div>
         </div>
+          );
+        })()}
 
       </div>
 

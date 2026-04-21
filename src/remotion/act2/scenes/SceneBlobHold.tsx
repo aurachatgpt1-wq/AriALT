@@ -108,7 +108,7 @@ export const SceneBlobHold: React.FC = () => {
   const { fps } = useVideoConfig();
 
   const sceneOp = Math.min(
-    interpolate(frame, [0, 12], [0, 1], clamp),
+    interpolate(frame, [0, 18], [0, 1], clamp),
     interpolate(frame, [TOTAL_DUR - 16, TOTAL_DUR], [1, 0], clamp),
   );
 

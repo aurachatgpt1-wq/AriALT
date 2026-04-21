@@ -22,7 +22,7 @@ export const SCENE_AGENT_CMMS_DURATION = 0;      // no longer rendered here
 // SceneWorkOrderExec — plays right after SceneAreas (Kanban no longer
 // mounted here; it has moved to between BlobHold Seq 3 and Seq 4).
 export const SCENE_WO_EXEC_START    = 595;
-export const SCENE_WO_EXEC_DURATION = 230;  // ~7.7s
+export const SCENE_WO_EXEC_DURATION = 270;  // cinema redesign (~9s)
 
 // SceneBlobHold — split into FOUR mounted chunks. Three interstitials
 // (dashboard / what-if / Kanban) slot between them:
@@ -33,66 +33,51 @@ export const SCENE_WO_EXEC_DURATION = 230;  // ~7.7s
 //   Part 2b = Seq 2 + Seq 3 (Up to 50% / Less waste / Autonomous tasks / ...)        312f
 //   [Kanban interstitial — 350f]
 //   Part 2c = Seq 4 + final buffer (Every optimization / cost savings / Low / High)  204f
-export const SCENE_BLOB_HOLD_PART1_START    = 825;
-export const SCENE_BLOB_HOLD_PART1_DURATION = 190;  // through end of "Up to 38% lower operating costs"
+export const SCENE_BLOB_HOLD_PART1_START    = 865;
+export const SCENE_BLOB_HOLD_PART1_DURATION = 190;
 
-// Dashboard interstitial — plays SceneAgentCMMS scene-local frames 5→486
-// (alarm cards intro → panel flip → banner → description + root cause + RP
-// typing → predictive insight zoom), then FREEZES at scene-local frame 485
-// for 30f (~1s) so the graph is visible + readable.
-export const SCENE_DASHBOARD_INTERSTITIAL_START      = 1015;
-export const SCENE_DASHBOARD_INTERSTITIAL_PLAY_DUR   = 481;  // play 5..486
-export const SCENE_DASHBOARD_INTERSTITIAL_FREEZE_DUR = 30;   // 1s hold on graph
+export const SCENE_DASHBOARD_INTERSTITIAL_START      = 1055;
+export const SCENE_DASHBOARD_INTERSTITIAL_PLAY_DUR   = 481;
+export const SCENE_DASHBOARD_INTERSTITIAL_FREEZE_DUR = 30;
 export const SCENE_DASHBOARD_INTERSTITIAL_FREEZE_AT  = 485;
 export const SCENE_DASHBOARD_INTERSTITIAL_DURATION   =
-  SCENE_DASHBOARD_INTERSTITIAL_PLAY_DUR + SCENE_DASHBOARD_INTERSTITIAL_FREEZE_DUR; // 511
+  SCENE_DASHBOARD_INTERSTITIAL_PLAY_DUR + SCENE_DASHBOARD_INTERSTITIAL_FREEZE_DUR;
 
-// BlobHold Part 2a — Seq 1: "+40% increase in equipment lifespan" +
-// "Reduction in equipment lifecycle costs". Blob-local frames 190..310.
-export const SCENE_BLOB_HOLD_PART2A_START    = 1526;
+export const SCENE_BLOB_HOLD_PART2A_START    = 1566;
 export const SCENE_BLOB_HOLD_PART2A_DURATION = 120;
 
-// What-If interstitial — plays SceneAgentCMMS scene-local frames 486..626.
-export const SCENE_WHATIF_INTERSTITIAL_START    = 1646;
+export const SCENE_WHATIF_INTERSTITIAL_START    = 1686;
 export const SCENE_WHATIF_INTERSTITIAL_OFFSET   = 486;
 export const SCENE_WHATIF_INTERSTITIAL_DURATION = 140;
 
-// BlobHold Part 2b — Seq 2 + Seq 3. Blob-local frames 310..622.
-// Ends RIGHT AFTER "Reduction in staff costs" (Seq 3's last phrase fades out
-// by Blob-local 622) so the Kanban interstitial lands on clean light bg.
-export const SCENE_BLOB_HOLD_PART2B_START    = 1786;
+export const SCENE_BLOB_HOLD_PART2B_START    = 1826;
 export const SCENE_BLOB_HOLD_PART2B_DURATION = 312;
 
-// Kanban interstitial — the full SceneKanbanRouting (agent stages, cards
-// pouring in column-by-column, ROUTED, 3 flights between columns), mounted
-// BETWEEN BlobHold Seq 3 and Seq 4 (so it plays right after "Reduction in
-// staff costs" and immediately before "Every optimization...").
-export const SCENE_KANBAN_START    = 2098;
-export const SCENE_KANBAN_DURATION = 350;  // ~11.7s
+export const SCENE_KANBAN_START    = 2138;
+export const SCENE_KANBAN_DURATION = 350;
 
-// BlobHold Part 2c — Seq 4 + final buffer. Blob-local frames 622..826.
-export const SCENE_BLOB_HOLD_PART2C_START    = 2448;
+export const SCENE_BLOB_HOLD_PART2C_START    = 2488;
 export const SCENE_BLOB_HOLD_PART2C_DURATION = 204;
 
-export const SCENE_FORM_START    = 2652;
+export const SCENE_FORM_START    = 2692;
 export const SCENE_FORM_DURATION = 1320;
 
-export const SCENE_2_START    = 3972;
+export const SCENE_2_START    = 4012;
 export const SCENE_2_DURATION = 180;
 
-export const SCENE_3_START    = 4152;
+export const SCENE_3_START    = 4192;
 export const SCENE_3_DURATION = 180;
 
-export const SCENE_4_START    = 4332;
+export const SCENE_4_START    = 4372;
 export const SCENE_4_DURATION = 210;
 
-export const SCENE_5_START    = 4542;
+export const SCENE_5_START    = 4582;
 export const SCENE_5_DURATION = 150;
 
-export const SCENE_6_START    = 4692;
+export const SCENE_6_START    = 4732;
 export const SCENE_6_DURATION = 150;
 
-export const TOTAL_FRAMES_2   = 4842; // ~161.4s
+export const TOTAL_FRAMES_2   = 4882; // ~162.7s
 
 // AriA Design Tokens (exact from real software)
 export const ARIA_COLORS = {
