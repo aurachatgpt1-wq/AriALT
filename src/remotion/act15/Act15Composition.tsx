@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Sequence } from "remotion";
+import { AbsoluteFill } from "remotion";
 import { TransitionSeries, linearTiming } from "@remotion/transitions";
 import { fade } from "@remotion/transitions/fade";
 import { Scene1ChatGPT } from "./scenes/Scene1ChatGPT";
@@ -9,26 +9,27 @@ import { SceneFasterStill } from "./scenes/SceneFasterStill";
 import { SceneBridge } from "./scenes/SceneBridge";
 import { SceneBridgeList } from "./scenes/SceneBridgeList";
 
-// Scene 1 + Scene 2 are one continuous ChatGPT session — no cut, no transition
-const SceneChatGPTFull: React.FC = () => (
-  <AbsoluteFill>
-    <Sequence durationInFrames={210}>
-      <Scene1ChatGPT />
-    </Sequence>
-    <Sequence from={210}>
-      <Scene2CopyPaste />
-    </Sequence>
-  </AbsoluteFill>
-);
-
 export const Act15Composition: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#F0F0F0" }}>
       <TransitionSeries>
 
-        {/* Scene 1+2 — ChatGPT continuous (210+450 = 660 frames) */}
-        <TransitionSeries.Sequence durationInFrames={660}>
-          <SceneChatGPTFull />
+        {/* Scene 1 — ChatGPT (135 frames) — exits early so the prompt
+            lands directly into Scene2's chat panel slot with no dissolve. */}
+        <TransitionSeries.Sequence durationInFrames={135}>
+          <Scene1ChatGPT />
+        </TransitionSeries.Sequence>
+
+        {/* → Scene 2: 1-frame near-hard cut — the prompt "pastes" into the
+            next screen instead of dissolving. */}
+        <TransitionSeries.Transition
+          presentation={fade()}
+          timing={linearTiming({ durationInFrames: 1 })}
+        />
+
+        {/* Scene 2 — CopyPaste (300 frames) */}
+        <TransitionSeries.Sequence durationInFrames={300}>
+          <Scene2CopyPaste />
         </TransitionSeries.Sequence>
 
         {/* → SceneThreeProblems: snappy 6-frame fade (avoid mid-scene overlap) */}
