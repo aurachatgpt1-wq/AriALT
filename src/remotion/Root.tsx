@@ -58,6 +58,27 @@ import { SceneWorkOrderExecCinema } from "./act2/scenes/SceneWorkOrderExecCinema
 import { SceneAlarmListCinema, ALARM_CINEMA_DURATION } from "./act2/scenes/SceneAlarmListCinema";
 import { SceneAgentCMMSCinema } from "./act2/scenes/SceneAgentCMMSCinema";
 import {
+  PhoneAgentGreenscreen,
+  PHONE_GS_FPS,
+  PHONE_GS_WIDTH,
+  PHONE_GS_HEIGHT,
+  PHONE_GS_DURATION,
+} from "./act2/scenes/PhoneAgentGreenscreen";
+import {
+  BackdropTaglineOnly,
+  BACKDROP_TAGLINE_FPS,
+  BACKDROP_TAGLINE_WIDTH,
+  BACKDROP_TAGLINE_HEIGHT,
+  BACKDROP_TAGLINE_DURATION,
+} from "./act2/scenes/BackdropTaglineOnly";
+import {
+  PhoneDashboardIntro,
+  PHONE_DASH_FPS,
+  PHONE_DASH_WIDTH,
+  PHONE_DASH_HEIGHT,
+  PHONE_DASH_DURATION,
+} from "./act2/scenes/PhoneDashboardIntro";
+import {
   SCENE_1_DURATION as ACT2_S1_DUR,
   SCENE_AREAS_DURATION,
   SCENE_FORM_DURATION,
@@ -318,6 +339,36 @@ export const RemotionRoot: React.FC = () => {
         fps={FPS2}
         width={1920}
         height={1080}
+      />
+
+      {/* ─── GREEN-SCREEN PLATE: iPhone agent mockup, portrait, chroma green ── */}
+      <Composition
+        id="Phone-Greenscreen"
+        component={PhoneAgentGreenscreen}
+        durationInFrames={PHONE_GS_DURATION}
+        fps={PHONE_GS_FPS}
+        width={PHONE_GS_WIDTH}
+        height={PHONE_GS_HEIGHT}
+      />
+
+      {/* ─── BACKDROP + TAGLINE ONLY: mobile-beat background & copy, no phone ── */}
+      <Composition
+        id="Backdrop-Tagline-Only"
+        component={BackdropTaglineOnly}
+        durationInFrames={BACKDROP_TAGLINE_DURATION}
+        fps={BACKDROP_TAGLINE_FPS}
+        width={BACKDROP_TAGLINE_WIDTH}
+        height={BACKDROP_TAGLINE_HEIGHT}
+      />
+
+      {/* ─── PHONE DASHBOARD INTRO: opening beat of the video — AriA "Overview" ── */}
+      <Composition
+        id="Phone-Dashboard-Intro"
+        component={PhoneDashboardIntro}
+        durationInFrames={PHONE_DASH_DURATION}
+        fps={PHONE_DASH_FPS}
+        width={PHONE_DASH_WIDTH}
+        height={PHONE_DASH_HEIGHT}
       />
 
       {/* ═══════════════════════════════════════════════════════════════════

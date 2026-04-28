@@ -938,7 +938,7 @@ const ReasoningBigCard: React.FC<{
 //   in 156→180 · hold 180→240 · out 240→260
 // Le due frasi si sovrappongono al centro dello schermo, dietro al telefono,
 // con crossfade morbido + leggero drift verticale per la firma Apple.
-const AppleBackdropTagline: React.FC<{ f: number }> = ({ f }) => {
+export const AppleBackdropTagline: React.FC<{ f: number }> = ({ f }) => {
   // Per-phase envelopes
   const p1In   = clamp((f - 36)  / 24, 0, 1);
   const p1Out  = clamp((f - 140) / 16, 0, 1);
@@ -1823,7 +1823,8 @@ const InventoryRack3D: React.FC<{ morphT: number; frame: number }> = ({ morphT, 
 };
 
 // ─── iPhone 3D mockup — rotates in, settles, screen shows agent notifications ─
-const IPhoneAgentMockup: React.FC<{ f: number; startLocal: number }> = ({ f, startLocal }) => {
+// Exported so it can be reused in standalone greenscreen compositions.
+export const IPhoneAgentMockup: React.FC<{ f: number; startLocal: number }> = ({ f, startLocal }) => {
   const local = f - startLocal;
 
   // Phase 1 — rotation entry (0..22f): rotates from -78° to settled tilt
@@ -2146,7 +2147,7 @@ const IPhoneAgentMockup: React.FC<{ f: number; startLocal: number }> = ({ f, sta
 // ═══════════════════════════════════════════════════════════════════════════
 
 // ─── PHASE A — HOME DASHBOARD (matches AriA mobile UI reference) ────────────
-const PhoneHomeScreen: React.FC<{ pushT: number; cardTapT: number }> = ({
+export const PhoneHomeScreen: React.FC<{ pushT: number; cardTapT: number }> = ({
   pushT, cardTapT,
 }) => {
   // iOS push — when detail takes over, home shifts LEFT by ~30% of screen width
@@ -2157,8 +2158,8 @@ const PhoneHomeScreen: React.FC<{ pushT: number; cardTapT: number }> = ({
     <div style={{
       position: "absolute", inset: 0,
       transform: `translateX(${pushX.toFixed(2)}px)`,
-      padding: "10px 22px 0",
-      display: "flex", flexDirection: "column", gap: 14,
+      padding: "8px 22px 0",
+      display: "flex", flexDirection: "column", gap: 10,
       willChange: "transform",
     }}>
       {/* Dim overlay that iOS draws on the back stack during a push */}
@@ -2190,17 +2191,17 @@ const PhoneHomeScreen: React.FC<{ pushT: number; cardTapT: number }> = ({
       </div>
 
       {/* TODAY section */}
-      <PhoneSectionHeader icon="cal" title="Today" sub="1 scheduled activity" />
+      <PhoneSectionHeader icon="cal" title="Today" sub="1 scheduled activities" />
       <PhoneWOCard
-        title="Bearing Seal Replacement"
-        sub="P-204 · Main Pump · 0/5 · 2 doc"
+        title="Generator Maintenance"
+        sub="0/4 completati · 2 doc"
         percent={0}
         tapT={cardTapT}
       />
 
       {/* PAST section */}
       <div style={{ height: 6 }} />
-      <PhoneSectionHeader icon="clock" title="Past" sub="1 archived work order" />
+      <PhoneSectionHeader icon="clock" title="Past" sub="4 archived work orders" />
       <div style={{
         textAlign: "center",
         fontSize: 10, fontWeight: 800, color: LABEL, letterSpacing: "0.18em",
@@ -2210,8 +2211,33 @@ const PhoneHomeScreen: React.FC<{ pushT: number; cardTapT: number }> = ({
       </div>
       <PhoneWOCard
         title="Hydraulic Pump Replacement"
-        sub="0/5 completed · 1 doc"
-        percent={0}
+        sub="5/5 completati · 1 doc"
+        percent={100}
+        muted
+      />
+      <PhoneWOCard
+        title="Conveyor Belt Tensioning"
+        sub="4/4 completati · 2 doc"
+        percent={100}
+        muted
+      />
+      <div style={{
+        textAlign: "center",
+        fontSize: 10, fontWeight: 800, color: LABEL, letterSpacing: "0.18em",
+        marginTop: 4, marginBottom: 2,
+      }}>
+        22 MAR 2026
+      </div>
+      <PhoneWOCard
+        title="Compressor Filter Change"
+        sub="3/3 completati · 1 doc"
+        percent={100}
+        muted
+      />
+      <PhoneWOCard
+        title="Coolant System Flush"
+        sub="6/6 completati · 3 doc"
+        percent={100}
         muted
       />
 
@@ -2220,6 +2246,71 @@ const PhoneHomeScreen: React.FC<{ pushT: number; cardTapT: number }> = ({
       <PhoneBottomNav />
     </div>
   );
+};
+
+// ─── SF Symbols-inspired icon set ──────────────────────────────────────────
+// Single source-of-truth for all phone-UI glyphs. 24×24 viewBox, 1.7 stroke,
+// rounded caps/joins, geometry tuned to match Apple's SF Symbols silhouettes
+// (calendar, clock.arrow.circlepath, house, wrench.and.screwdriver,
+// magnifyingglass). Keeps the visual language consistent across screens.
+type IOSIconName =
+  | "calendar"
+  | "clockBack"
+  | "house"
+  | "wrenchScrewdriver"
+  | "magnifyingGlass";
+
+const IOSIcon: React.FC<{ name: IOSIconName; size?: number; color?: string; weight?: number }> = ({
+  name, size = 18, color = INK, weight = 1.7,
+}) => {
+  const common = {
+    stroke: color,
+    strokeWidth: weight,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    fill: "none" as const,
+  };
+  switch (name) {
+    case "calendar":
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="5" width="18" height="16" rx="3.2" {...common} />
+          <path d="M8 3v4M16 3v4M3 10h18" {...common} />
+        </svg>
+      );
+    case "clockBack":
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+          <path d="M12 4a8 8 0 1 1-7.6 5.6" {...common} />
+          <path d="M3 3v5h5" {...common} />
+          <path d="M12 8v4l3 1.8" {...common} />
+        </svg>
+      );
+    case "house":
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+          <path d="M3 11l9-7.5 9 7.5v9a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 20V11z" {...common} />
+          <path d="M9.5 21.5V14h5v7.5" {...common} />
+        </svg>
+      );
+    case "wrenchScrewdriver":
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+          {/* Wrench: open jaw at top-right, handle going to lower-left */}
+          <path d="M21.5 3.5l-2.3 2.3 1.5 1.5-1.4 1.4-1.5-1.5-2.3 2.3a3 3 0 0 1-3.4 3.4L3.6 22.5a1.5 1.5 0 1 1-2.1-2.1L11.4 10.5a3 3 0 0 1 3.4-3.4l4.4-4.4a3 3 0 0 1 2.3 1z" {...common} />
+          {/* Screwdriver: tip at top-left, blade crossing wrench, handle bottom-right */}
+          <path d="M2.5 4.5l3-2 1.7 1.7-2 3-2.7-2.7z" {...common} />
+          <path d="M5.2 7.2L19 21a1.7 1.7 0 0 0 2.4-2.4L7.6 4.8" {...common} />
+        </svg>
+      );
+    case "magnifyingGlass":
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+          <circle cx="10.5" cy="10.5" r="6.5" {...common} />
+          <path d="M15.5 15.5L20 20" {...common} />
+        </svg>
+      );
+  }
 };
 
 // ─── Reusable small section header (icon + title + sub) ────────────────────
@@ -2233,18 +2324,9 @@ const PhoneSectionHeader: React.FC<{ icon: "cal" | "clock"; title: string; sub: 
       display: "flex", alignItems: "center", justifyContent: "center",
       color: INK, fontSize: 14, fontWeight: 800,
     }}>
-      {icon === "cal" ? (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <rect x="2" y="3" width="12" height="11" rx="1.8" stroke={INK} strokeWidth="1.4" />
-          <path d="M5 1.5v2.5M11 1.5v2.5M2 6.5h12" stroke={INK} strokeWidth="1.4" strokeLinecap="round" />
-        </svg>
-      ) : (
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M8 3.2a4.8 4.8 0 1 1-4.54 3.25" stroke={INK} strokeWidth="1.4" strokeLinecap="round" />
-          <path d="M2.2 2.6v3h3M8 5v3.2l2.2 1.4" stroke={INK} strokeWidth="1.4"
-            strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      )}
+      {icon === "cal"
+        ? <IOSIcon name="calendar"  size={17} />
+        : <IOSIcon name="clockBack" size={17} />}
     </div>
     <div style={{ display: "flex", flexDirection: "column" }}>
       <div style={{ fontSize: 15, fontWeight: 800, color: INK, letterSpacing: "-0.01em" }}>{title}</div>
@@ -2319,16 +2401,10 @@ const PhoneBottomNav: React.FC = () => (
       boxShadow: "0 8px 20px -10px rgba(15,15,18,0.12), 0 1px 3px rgba(15,15,18,0.05)",
     }}>
       <PhoneNavItem label="Overview" active={false} icon={
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M2.5 7L8 2.5 13.5 7v6a1 1 0 0 1-1 1H10v-4H6v4H3.5a1 1 0 0 1-1-1V7z"
-            stroke={INK} strokeWidth="1.4" strokeLinejoin="round" />
-        </svg>
+        <IOSIcon name="house" size={18} />
       } />
       <PhoneNavItem label="Orders" active={true} icon={
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M2.5 11.5l5.5-5.5M4 2.5l3 3-1.5 1.5-3-3L4 2.5zM12 2.5l-3 3 1.5 1.5 3-3L12 2.5zM5.5 10l3 3 1-1-3-3-1 1z"
-            stroke={INK} strokeWidth="1.3" strokeLinejoin="round" strokeLinecap="round" />
-        </svg>
+        <IOSIcon name="wrenchScrewdriver" size={18} />
       } />
     </div>
     <div style={{
@@ -2337,10 +2413,7 @@ const PhoneBottomNav: React.FC = () => (
       display: "flex", alignItems: "center", justifyContent: "center",
       boxShadow: "0 8px 20px -10px rgba(15,15,18,0.12), 0 1px 3px rgba(15,15,18,0.05)",
     }}>
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <circle cx="7" cy="7" r="4.5" stroke={INK} strokeWidth="1.5" />
-        <path d="M10.3 10.3l3 3" stroke={INK} strokeWidth="1.5" strokeLinecap="round" />
-      </svg>
+      <IOSIcon name="magnifyingGlass" size={18} />
     </div>
   </div>
 );
@@ -2365,7 +2438,7 @@ const PhoneNavItem: React.FC<{ label: string; icon: React.ReactNode; active: boo
 // A full-screen mobile UI that replaces the AI overlay: header + 4 SKU rows
 // with stock bars, one pulsing "low stock" alert at top. Designed so the
 // camera push-in lands on a self-sufficient screen that reads at full viewport.
-const PhoneInventoryScreen: React.FC<{
+export const PhoneInventoryScreen: React.FC<{
   riseT: number; listT: number; alertT: number;
 }> = ({ riseT, listT, alertT }) => {
   if (riseT <= 0) return null;
@@ -2914,73 +2987,101 @@ const BulletRow: React.FC<{
   );
 };
 
-const PhoneNotificationBanner: React.FC<{ notifT: number; dismiss: number }> = ({
+export const PhoneNotificationBanner: React.FC<{ notifT: number; dismiss: number }> = ({
   notifT, dismiss,
 }) => {
   const ag = AGENTS.maintenance;
-  const e = 1 - Math.pow(1 - notifT, 3);
-  // iOS-style swipe-up dismiss: banner slides back above the status bar with
-  // a mild ease-in (accelerating) so it feels flicked away.
+
+  // Spring-like entrance with mild overshoot — the characteristic bounce
+  // iOS adds when a banner drops down from the top of the screen.
+  const t = notifT;
+  const e = 1 - Math.pow(1 - t, 3);
+  const overshoot = Math.sin(Math.min(1, t) * Math.PI) * (1 - t) * 8;
+
+  // Swipe-up dismiss: slight ease-in acceleration, the banner flicks away.
   const eOut = Math.pow(dismiss, 2);
-  const enterTranslate = (1 - e) * -120;
-  const outTranslate   = -eOut * 160;
-  const tapScale = 1 - eOut * 0.02;
-  const opacity  = notifT * (1 - Math.pow(dismiss, 1.4));
+
+  const enterTranslate = (1 - e) * -140 + overshoot;
+  const outTranslate   = -eOut * 180;
+  const opacity        = t * (1 - Math.pow(dismiss, 1.4));
+
   return (
     <div style={{
-      position: "absolute", top: 10, left: 14, right: 14,
-      borderRadius: 16,
-      background: "rgba(255,255,255,0.96)",
-      backdropFilter: "blur(20px)",
-      WebkitBackdropFilter: "blur(20px)",
-      border: "1px solid rgba(15,15,18,0.07)",
-      boxShadow: "0 20px 40px -14px rgba(15,15,18,0.22), 0 4px 12px -4px rgba(15,15,18,0.1)",
-      padding: "11px 13px",
+      // Sit a hair below the status bar, with generous iOS-style margins.
+      position: "absolute", top: 8, left: 10, right: 10,
+      // Apple 26-px soft rectangle — matches iOS 17 banner radius.
+      borderRadius: 22,
+      // Frosted translucent white like the NotificationCenter cards —
+      // higher blur + slight saturation bump reads as real iOS chrome.
+      background: "rgba(252,252,253,0.82)",
+      backdropFilter: "blur(28px) saturate(160%)",
+      WebkitBackdropFilter: "blur(28px) saturate(160%)",
+      // Hairline border — iOS uses a near-invisible outline, no heavy stroke.
+      border: "0.5px solid rgba(15,15,18,0.06)",
+      // Two-layer shadow: tight ambient + diffused drop — Apple's banner recipe.
+      boxShadow:
+        "0 1px 2px rgba(15,15,18,0.05), " +
+        "0 12px 28px -10px rgba(15,15,18,0.16), " +
+        "0 30px 50px -18px rgba(15,15,18,0.14)",
+      padding: "11px 14px",
       display: "flex", gap: 11, alignItems: "center",
       opacity,
-      transform: `translateY(${(enterTranslate + outTranslate).toFixed(2)}px) scale(${tapScale.toFixed(3)})`,
-      transformOrigin: "50% 50%",
+      transform: `translateY(${(enterTranslate + outTranslate).toFixed(2)}px)`,
+      transformOrigin: "50% 0%",
       willChange: "transform, opacity",
     }}>
+      {/* App icon — iOS app-icon proportions (36 px, 22 % radius). */}
       <div style={{
-        width: 32, height: 32, borderRadius: 9,
+        width: 36, height: 36, borderRadius: 10,
         background: `linear-gradient(135deg, ${ag.color} 0%, ${ag.colorDark} 100%)`,
-        color: "#fff", fontSize: 13, fontWeight: 800,
+        color: "#fff", fontSize: 15, fontWeight: 800,
+        letterSpacing: "-0.02em",
         display: "flex", alignItems: "center", justifyContent: "center",
         flexShrink: 0,
-        boxShadow: `0 4px 10px -2px ${ag.color}55`,
+        // Subtle inner highlight (top edge) + outer colour glow, like an iOS
+        // glossy app icon.
+        boxShadow:
+          `inset 0 1px 0 rgba(255,255,255,0.35), ` +
+          `0 3px 8px -2px ${ag.color}66`,
       }}>{ag.letter}</div>
+
+      {/* Text block — 3 rows: app name + time | title | subtitle */}
       <div style={{ flex: 1, minWidth: 0 }}>
+        {/* Row 1 — app name (left) + timestamp (right). No colour, no badges. */}
         <div style={{
-          display: "flex", alignItems: "baseline", gap: 6,
-          fontSize: 9, fontWeight: 800, color: ag.colorDark, letterSpacing: "0.1em",
-          marginBottom: 1,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          fontSize: 11, fontWeight: 600, color: INK_SOFT,
+          letterSpacing: "-0.005em",
+          lineHeight: 1,
+          marginBottom: 2,
         }}>
-          <span>MAINTENANCE</span>
           <span style={{
-            padding: "0.5px 5px", borderRadius: 999,
-            background: `${CRITICAL}18`, border: `1px solid ${CRITICAL}44`,
-            color: CRITICAL_DARK, fontSize: 8, letterSpacing: "0.08em",
-          }}>HIGH</span>
-          <span style={{ marginLeft: "auto", color: MUTED, fontWeight: 700 }}>now</span>
+            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          }}>ARIA Maintenance</span>
+          <span style={{ color: MUTED, fontWeight: 500, flexShrink: 0, marginLeft: 8 }}>now</span>
         </div>
+
+        {/* Row 2 — notification title, bold, Apple-tight tracking */}
         <div style={{
-          fontSize: 12.5, fontWeight: 800, color: INK,
-          letterSpacing: "-0.01em", lineHeight: 1.2,
+          fontSize: 13, fontWeight: 700, color: INK,
+          letterSpacing: "-0.015em", lineHeight: 1.2,
           whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-        }}>New WO · Bearing Seal Replacement</div>
+        }}>New work order assigned</div>
+
+        {/* Row 3 — supporting detail */}
         <div style={{
-          fontSize: 10.5, fontWeight: 500, color: INK_SOFT,
+          fontSize: 12, fontWeight: 400, color: INK_SOFT,
+          letterSpacing: "-0.005em",
           marginTop: 1, lineHeight: 1.25,
           whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-        }}>P-204 · Main Water Pump · 5 steps</div>
+        }}>Bearing Seal Replacement · P-204</div>
       </div>
     </div>
   );
 };
 
 // ─── PHASE C — WORK-ORDER DETAIL (active step view) ────────────────────────
-const PhoneDetailScreen: React.FC<{
+export const PhoneDetailScreen: React.FC<{
   pushT: number; stepT: number; toolsT: number; ctaT: number;
   aiTapT: number; modalT: number;
 }> = ({ pushT, stepT, toolsT, ctaT, aiTapT, modalT }) => {
@@ -2994,12 +3095,13 @@ const PhoneDetailScreen: React.FC<{
   // Tap animation — scale-down then back up
   const tapCurve = aiTapT <= 0.5 ? aiTapT * 2 : (1 - aiTapT) * 2;
   const tapScale = 1 - tapCurve * 0.05;
-  // iOS card-stack modal: when AI overlay rises, detail scales down slightly
-  // and gets rounded top corners + a dim overlay — like a presented sheet stack.
-  const eModal = 1 - Math.pow(1 - modalT, 3);
-  const stackScale  = 1 - eModal * 0.06;         // 1 → 0.94
-  const stackRadius = eModal * 18;               // 0 → 18px top corners
-  const stackTY     = -eModal * 8;               // slight upward lift
+  // Background detail screen stays PUT when the AI modal rises — no card-stack
+  // compression, no lift, no dim overlay. The liquid-glass sheet handles all
+  // the depth cues on its own; keeping the presenter still lets the user see
+  // the original screen clearly through the transparent glass.
+  const stackScale  = 1;
+  const stackRadius = 0;
+  const stackTY     = 0;
 
   // WO context
   const stepIndex     = 2;
@@ -3024,19 +3126,9 @@ const PhoneDetailScreen: React.FC<{
       overflow: "hidden",
       padding: "6px 20px 14px",
       display: "flex", flexDirection: "column", gap: 12,
-      boxShadow: eModal > 0
-        ? `0 -10px 30px -12px rgba(15,15,18,${(0.18 * eModal).toFixed(3)})`
-        : "none",
+      boxShadow: "none",
       willChange: "transform",
     }}>
-      {/* iOS-style dim overlay when AI modal presents on top (card-stack) */}
-      <div style={{
-        position: "absolute", inset: 0,
-        background: "#000",
-        opacity: eModal * 0.22,
-        pointerEvents: "none",
-        zIndex: 99,
-      }} />
       {/* ── HEADER — centered WO title + close X ── */}
       <div style={{
         position: "relative",
@@ -3240,11 +3332,15 @@ const PhoneDetailScreen: React.FC<{
 };
 
 // ─── PHASE D — AI VOICE HELP OVERLAY (mic → transcript → answer + diagram) ──
-const PhoneAIHelpOverlay: React.FC<{
+export const PhoneAIHelpOverlay: React.FC<{
   riseT: number; micT: number; transT: number;
   thinkT: number; answerT: number; diagramT: number;
   dismissT?: number;
-}> = ({ riseT, micT, transT, thinkT, answerT, diagramT, dismissT = 0 }) => {
+  cameraCtaT?: number;        // CTA "record a video" fade-in (after diagram)
+  cameraTapT?: number;        // tap feedback on CTA before camera takes over
+}> = ({ riseT, micT, transT, thinkT, answerT, diagramT, dismissT = 0,
+  cameraCtaT = 0, cameraTapT = 0,
+}) => {
   if (riseT <= 0) return null;
   // iOS modal sheet: slides up from BOTTOM of screen. Content area is ~780px
   // tall; the sheet covers the top portion, leaving a small gap at the top
@@ -3267,190 +3363,380 @@ const PhoneAIHelpOverlay: React.FC<{
     "First, release the coupling bolts, then slide the locking ring off the shaft. The impeller will pull free along the keyway — no force needed.";
   const aiShown = aiAnswer.slice(0, Math.floor(aiAnswer.length * answerT));
 
+  const listeningNow = answerT < 0.05 && transT > 0;
+
+  // Specular sweep — a slow highlight that slides along the top edge of the
+  // sheet while it rises, giving the glass a "wet" Apple-Vision-Pro shimmer.
+  const sheen = clamp((riseT - 0.1) / 0.6, 0, 1);
+  const sheenX = -30 + sheen * 140;   // % across the top
+
   return (
     <div style={{
       position: "absolute",
       top: SHEET_TOP_GAP, left: 0, right: 0, bottom: 0,
-      background: "rgba(255,255,255,0.99)",
-      backdropFilter: "blur(14px)",
-      WebkitBackdropFilter: "blur(14px)",
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
-      boxShadow: "0 -20px 40px -18px rgba(15,15,18,0.22)",
+      // ── Liquid-glass sheet — very transparent overall, but darkens slightly
+      //    toward the middle where the ARIA text sits, so copy stays legible
+      //    without turning the whole sheet into a wall of ink.
+      background:
+        "linear-gradient(180deg, rgba(60,70,95,0.04) 0%, rgba(30,38,56,0.14) 35%, rgba(22,28,44,0.20) 65%, rgba(18,24,40,0.12) 100%)",
+      backdropFilter: "blur(28px) saturate(170%) brightness(0.88)",
+      WebkitBackdropFilter: "blur(28px) saturate(170%) brightness(0.88)",
+      borderTopLeftRadius: 32,
+      borderTopRightRadius: 32,
+      border: "0.5px solid rgba(255,255,255,0.22)",
+      borderBottom: "none",
+      // Only inset highlights (no outer drop shadow) — an outer dark shadow
+      // above the top edge looked like a bruise against the light presenter.
+      boxShadow:
+        "inset 0 1.5px 0 rgba(255,255,255,0.28), " +
+        "inset 0 -0.5px 0 rgba(255,255,255,0.06), " +
+        "inset 1px 0 0 rgba(255,255,255,0.09), " +
+        "inset -1px 0 0 rgba(255,255,255,0.09)",
       transform: `translateY(${enterY.toFixed(2)}px)`,
       opacity: sheetOp,
-      padding: "10px 20px 16px",
-      display: "flex", flexDirection: "column", gap: 12,
+      padding: "16px 16px 16px",
+      display: "flex", flexDirection: "column", gap: 14,
       overflow: "hidden",
       willChange: "transform, opacity",
+      color: "#fff",
     }}>
-      {/* iOS-style drag handle (grabber) at the top of the sheet */}
+      {/* ── Specular top-edge highlight — soft diagonal gloss that animates
+           once on rise, then rests as a subtle sheen. Liquid-glass signature. */}
       <div style={{
-        position: "absolute", top: 6, left: "50%",
-        transform: "translateX(-50%)",
-        width: 38, height: 4, borderRadius: 2,
-        background: "rgba(15,15,18,0.14)",
+        position: "absolute", top: 0, left: 0, right: 0, height: 110,
+        background:
+          `radial-gradient(120% 80% at ${sheenX}% -10%, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.12) 22%, rgba(255,255,255,0) 55%)`,
+        pointerEvents: "none",
+        mixBlendMode: "screen",
       }} />
-      {/* Top row — AriA AI label + close X */}
+      {/* Chromatic aberration kiss — cyan/magenta hints on the edge */}
+      <div style={{
+        position: "absolute", top: 0, left: 0, right: 0, height: 2,
+        background:
+          "linear-gradient(90deg, rgba(170,205,255,0.0) 0%, rgba(170,205,255,0.55) 18%, rgba(255,255,255,0.85) 50%, rgba(255,200,230,0.55) 82%, rgba(255,200,230,0) 100%)",
+        filter: "blur(0.6px)",
+        opacity: 0.7,
+        borderTopLeftRadius: 32,
+        borderTopRightRadius: 32,
+        pointerEvents: "none",
+      }} />
+
+      {/* Grabber — brighter handle with inner glow */}
+      <div style={{
+        position: "absolute", top: 8, left: "50%",
+        transform: "translateX(-50%)",
+        width: 42, height: 5, borderRadius: 3,
+        background: "rgba(255,255,255,0.38)",
+        boxShadow: "inset 0 0.5px 0 rgba(255,255,255,0.55)",
+      }} />
+
+      {/* Soft darkening halo behind the header — a very localized gradient
+          that fades to zero, so the "Aria Engine" label + close X always
+          have contrast without blocking the rest of the transparent sheet. */}
+      <div style={{
+        position: "absolute",
+        top: 0, left: 0, right: 0, height: 74,
+        background:
+          "linear-gradient(180deg, rgba(10,14,24,0.25) 0%, rgba(10,14,24,0.10) 60%, rgba(10,14,24,0) 100%)",
+        pointerEvents: "none",
+        borderTopLeftRadius: 32,
+        borderTopRightRadius: 32,
+      }} />
+
+      {/* Header — "Aria Engine" title + soft close X */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        minHeight: 36,
+        paddingTop: 10,
+        position: "relative", zIndex: 2,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{
-            width: 28, height: 28, borderRadius: 9,
-            background: `linear-gradient(135deg, ${ACCENT} 0%, ${PURPLE} 100%)`,
-            color: "#fff", fontSize: 13, fontWeight: 900,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: `0 4px 10px -2px ${ACCENT}55`,
-          }}>A</div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{
-              fontSize: 9, fontWeight: 800, color: MUTED, letterSpacing: "0.14em",
-            }}>ARIA AI · HELP</div>
-            <div style={{
-              fontSize: 12, fontWeight: 800, color: INK, letterSpacing: "-0.01em",
-            }}>Step 2 · Impeller</div>
-          </div>
-        </div>
         <div style={{
-          width: 32, height: 32, borderRadius: "50%",
-          background: "rgba(15,15,18,0.06)",
+          fontSize: 14, fontWeight: 700, color: "#fff",
+          letterSpacing: "-0.018em",
+          textShadow: "0 1px 2px rgba(0,0,0,0.55), 0 0 8px rgba(0,0,0,0.35)",
+        }}>Aria Engine</div>
+        <div style={{
+          width: 28, height: 28, borderRadius: "50%",
+          background:
+            "linear-gradient(135deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 100%)",
+          border: "0.5px solid rgba(255,255,255,0.28)",
           display: "flex", alignItems: "center", justifyContent: "center",
+          backdropFilter: "blur(14px) saturate(180%)",
+          WebkitBackdropFilter: "blur(14px) saturate(180%)",
+          boxShadow:
+            "inset 0 1px 0 rgba(255,255,255,0.35), " +
+            "inset 0 -1px 0 rgba(255,255,255,0.05), " +
+            "0 2px 6px -2px rgba(0,0,0,0.3)",
         }}>
-          <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-            <path d="M2.5 2.5l6 6M8.5 2.5l-6 6" stroke={INK}
+          <svg width="10" height="10" viewBox="0 0 11 11" fill="none">
+            <path d="M2.5 2.5l6 6M8.5 2.5l-6 6"
+              stroke="rgba(255,255,255,0.92)"
               strokeWidth="1.6" strokeLinecap="round" />
           </svg>
         </div>
       </div>
 
-      {/* User bubble — appears when transcription starts */}
+      {/* User bubble — right-aligned, liquid-blue "ME" bubble */}
       {transT > 0 && (
         <div style={{
           alignSelf: "flex-end",
-          maxWidth: "88%",
-          background: `linear-gradient(135deg, ${ACCENT} 0%, ${ACCENT_DARK} 100%)`,
-          color: "#fff",
-          borderRadius: 14,
-          borderBottomRightRadius: 4,
-          padding: "9px 12px",
-          fontSize: 11.5, fontWeight: 600,
-          letterSpacing: "-0.005em", lineHeight: 1.3,
-          boxShadow: `0 6px 14px -6px ${ACCENT}66`,
+          maxWidth: "78%",
           opacity: clamp(transT * 4, 0, 1),
+          position: "relative", zIndex: 2,
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 2 }}>
-            <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
-              <rect x="3.25" y="1" width="2.5" height="4.5" rx="1.25" fill="#fff" />
-              <path d="M1.5 4v0.3a3 3 0 0 0 6 0V4M4.5 7v1" stroke="#fff"
-                strokeWidth="0.8" strokeLinecap="round" />
-            </svg>
-            <span style={{ fontSize: 8.5, fontWeight: 700, letterSpacing: "0.08em",
-              opacity: 0.85 }}>YOU · VOICE</span>
+          <div style={{
+            fontSize: 9, fontWeight: 800,
+            color: "rgba(255,255,255,0.7)",
+            letterSpacing: "0.16em",
+            textAlign: "right",
+            marginBottom: 4,
+            textShadow: "0 1px 2px rgba(0,0,0,0.25)",
+          }}>ME</div>
+          <div style={{
+            position: "relative",
+            background:
+              `linear-gradient(160deg, rgba(120,150,255,0.95) 0%, ${ACCENT} 45%, ${ACCENT_DARK} 100%)`,
+            color: "#fff",
+            borderRadius: 22,
+            padding: "10px 16px",
+            fontSize: 12.5, fontWeight: 500,
+            letterSpacing: "-0.005em", lineHeight: 1.35,
+            border: "0.5px solid rgba(255,255,255,0.35)",
+            boxShadow:
+              `0 14px 28px -12px ${ACCENT}CC, ` +
+              `0 2px 6px -2px rgba(0,0,0,0.3), ` +
+              `inset 0 1.5px 0 rgba(255,255,255,0.45), ` +
+              `inset 0 -1px 0 rgba(255,255,255,0.08)`,
+            overflow: "hidden",
+          }}>
+            {/* Inner gloss sweep on the blue bubble */}
+            <div style={{
+              position: "absolute", inset: 0,
+              background:
+                "linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.06) 38%, rgba(255,255,255,0) 65%)",
+              pointerEvents: "none",
+              borderRadius: 22,
+            }} />
+            <span style={{ position: "relative" }}>
+              {userShown}
+              {transT < 1 && <span style={{ opacity: 0.7 }}>|</span>}
+            </span>
           </div>
-          <span>"{userShown}</span>
-          {transT < 1 && <span style={{ opacity: 0.7 }}>|</span>}
-          {transT >= 1 && <span>"</span>}
         </div>
       )}
 
-      {/* AI bubble — thinking then answer, + diagram */}
+      {/* AI response — liquid-glass frosted card, left-aligned */}
       {(thinkT > 0 || answerT > 0 || diagramT > 0) && (
         <div style={{
           alignSelf: "flex-start",
-          width: "100%",
-          display: "flex", flexDirection: "column", gap: 8,
+          width: "86%",
+          position: "relative", zIndex: 2,
         }}>
           <div style={{
-            display: "flex", alignItems: "center", gap: 6,
-            fontSize: 9, fontWeight: 800, color: ACCENT_DARK,
-            letterSpacing: "0.14em",
+            position: "relative",
+            // Slightly denser fill than the sheet so the answer text has a
+            // subtle "glass pane" behind it for legibility, without losing
+            // the see-through feel.
+            background:
+              "linear-gradient(180deg, rgba(20,24,36,0.32) 0%, rgba(14,18,28,0.24) 100%)",
+            backdropFilter: "blur(18px) saturate(170%) brightness(0.95)",
+            WebkitBackdropFilter: "blur(18px) saturate(170%) brightness(0.95)",
+            border: "0.5px solid rgba(255,255,255,0.28)",
+            borderRadius: 22,
+            padding: "12px 14px",
+            boxShadow:
+              "0 14px 28px -14px rgba(0,0,0,0.55), " +
+              "0 2px 6px -2px rgba(0,0,0,0.25), " +
+              "inset 0 1.5px 0 rgba(255,255,255,0.3), " +
+              "inset 0 -1px 0 rgba(255,255,255,0.05)",
+            display: "flex", flexDirection: "column", gap: 10,
+            overflow: "hidden",
           }}>
-            <span style={{
-              width: 16, height: 16, borderRadius: 5,
-              background: `linear-gradient(135deg, ${ACCENT} 0%, ${PURPLE} 100%)`,
-              display: "inline-flex", alignItems: "center", justifyContent: "center",
-              color: "#fff", fontSize: 9, fontWeight: 900,
-            }}>A</span>
-            ARIA
+            {/* Glossy top-sheen inside the ARIA card */}
+            <div style={{
+              position: "absolute",
+              top: 0, left: 0, right: 0, height: 30,
+              background:
+                "linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%)",
+              borderTopLeftRadius: 22, borderTopRightRadius: 22,
+              pointerEvents: "none",
+            }} />
+            {/* ARIA small-caps label */}
+            <div style={{
+              fontSize: 9, fontWeight: 800,
+              color: "rgba(255,255,255,0.88)",
+              letterSpacing: "0.18em",
+              position: "relative",
+              textShadow: "0 1px 2px rgba(0,0,0,0.55), 0 0 6px rgba(0,0,0,0.3)",
+            }}>ARIA</div>
+
+            {/* Thinking dots */}
+            {thinkT > 0 && answerT < 0.05 && (
+              <div style={{
+                display: "flex", gap: 5, alignItems: "center",
+                opacity: clamp(thinkT * 3, 0, 1),
+                position: "relative",
+              }}>
+                {[0, 1, 2].map((i) => {
+                  const delay = i * 0.2;
+                  const phase = ((thinkT * 6 - delay) % 1 + 1) % 1;
+                  const op = 0.35 + Math.sin(phase * Math.PI) * 0.55;
+                  return (
+                    <span key={i} style={{
+                      width: 6, height: 6, borderRadius: "50%",
+                      background: "#fff", opacity: op,
+                      boxShadow: "0 0 6px rgba(255,255,255,0.5)",
+                    }} />
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Answer */}
+            {answerT > 0.05 && (
+              <div style={{
+                fontSize: 12, fontWeight: 500,
+                color: "rgba(255,255,255,0.98)",
+                letterSpacing: "-0.003em", lineHeight: 1.45,
+                position: "relative",
+                textShadow:
+                  "0 1px 2px rgba(0,0,0,0.55), 0 0 8px rgba(0,0,0,0.35)",
+              }}>
+                {aiShown}
+                {answerT < 1 && <span style={{ opacity: 0.5 }}>|</span>}
+              </div>
+            )}
+
+            {/* Diagram — nested in a light glass frame so the blueprint
+                strokes stay legible inside the translucent AI card */}
+            {diagramT > 0 && (
+              <div style={{
+                position: "relative",
+                background:
+                  "linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(242,245,252,0.92) 100%)",
+                borderRadius: 14,
+                padding: "8px 6px",
+                marginTop: 2,
+                border: "0.5px solid rgba(255,255,255,0.6)",
+                boxShadow:
+                  "inset 0 1px 0 rgba(255,255,255,0.8), " +
+                  "0 4px 10px -4px rgba(0,0,0,0.25)",
+                overflow: "hidden",
+              }}>
+                <ImpellerDiagram diagramT={diagramT} />
+              </div>
+            )}
+
+            {/* Camera CTA — liquid-glass accent variant inside the dark card */}
+            {cameraCtaT > 0 && (() => {
+              const ctaE   = 1 - Math.pow(1 - cameraCtaT, 3);
+              const tapCur = cameraTapT <= 0.5 ? cameraTapT * 2 : (1 - cameraTapT) * 2;
+              const press  = 1 - tapCur * 0.05;
+              return (
+                <div style={{
+                  marginTop: 2,
+                  display: "flex", alignItems: "center", gap: 10,
+                  padding: "10px 12px",
+                  background: cameraTapT > 0
+                    ? `linear-gradient(135deg, rgba(74,109,245,${(0.32 + tapCur * 0.15).toFixed(3)}) 0%, rgba(139,92,246,${(0.32 + tapCur * 0.15).toFixed(3)}) 100%)`
+                    : `linear-gradient(135deg, rgba(74,109,245,0.20) 0%, rgba(139,92,246,0.20) 100%)`,
+                  border: `0.5px solid rgba(138,170,255,${(0.45 + tapCur * 0.2).toFixed(3)})`,
+                  borderRadius: 14,
+                  opacity: ctaE,
+                  transform: `translateY(${((1 - ctaE) * 6).toFixed(2)}px) scale(${press.toFixed(3)})`,
+                  transformOrigin: "50% 50%",
+                  willChange: "transform",
+                  boxShadow: cameraTapT > 0
+                    ? `0 10px 22px -8px rgba(74,109,245,${(0.6 * tapCur).toFixed(3)})`
+                    : "0 4px 10px -4px rgba(74,109,245,0.35), inset 0 1px 0 rgba(255,255,255,0.14)",
+                  backdropFilter: "blur(8px)",
+                  WebkitBackdropFilter: "blur(8px)",
+                }}>
+                  <div style={{
+                    width: 28, height: 28, borderRadius: 9,
+                    background: `linear-gradient(135deg, ${ACCENT} 0%, ${PURPLE} 100%)`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    boxShadow: `0 4px 10px -3px ${ACCENT}99`,
+                  }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                      <path d="M4 8a2 2 0 0 1 2-2h2l1.4-1.8A1 1 0 0 1 10.2 4h3.6a1 1 0 0 1 .8.2L16 6h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z"
+                        stroke="#fff" strokeWidth="1.7" strokeLinejoin="round" />
+                      <circle cx="12" cy="12.5" r="3.5" stroke="#fff" strokeWidth="1.7" />
+                      <circle cx="17" cy="8.7" r="0.7" fill="#fff" />
+                    </svg>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{
+                      fontSize: 11.5, fontWeight: 700, color: "#fff",
+                      letterSpacing: "-0.005em", lineHeight: 1.15,
+                    }}>Record a video for deeper diagnosis</div>
+                    <div style={{
+                      fontSize: 9.5, fontWeight: 500,
+                      color: "rgba(255,255,255,0.65)",
+                      marginTop: 1,
+                    }}>ARIA Vision will analyse the part live</div>
+                  </div>
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M3.5 2l3 3-3 3"
+                      stroke="rgba(255,255,255,0.75)"
+                      strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+              );
+            })()}
           </div>
-
-          {/* Thinking dots while answer is empty */}
-          {thinkT > 0 && answerT < 0.05 && (
-            <div style={{
-              background: "rgba(15,15,18,0.04)",
-              border: "1px solid rgba(15,15,18,0.06)",
-              borderRadius: 14,
-              borderTopLeftRadius: 4,
-              padding: "10px 14px",
-              display: "flex", gap: 4,
-              alignItems: "center",
-              width: "fit-content",
-              opacity: clamp(thinkT * 3, 0, 1),
-            }}>
-              {[0, 1, 2].map((i) => {
-                const delay = i * 0.2;
-                const phase = ((thinkT * 6 - delay) % 1 + 1) % 1;
-                const op = 0.4 + Math.sin(phase * Math.PI) * 0.6;
-                return (
-                  <span key={i} style={{
-                    width: 5, height: 5, borderRadius: "50%",
-                    background: INK, opacity: op,
-                  }} />
-                );
-              })}
-            </div>
-          )}
-
-          {/* Answer text bubble */}
-          {answerT > 0.05 && (
-            <div style={{
-              background: "rgba(15,15,18,0.04)",
-              border: "1px solid rgba(15,15,18,0.06)",
-              borderRadius: 14,
-              borderTopLeftRadius: 4,
-              padding: "10px 12px",
-              fontSize: 11.5, fontWeight: 500, color: INK,
-              letterSpacing: "-0.005em", lineHeight: 1.4,
-            }}>
-              {aiShown}
-              {answerT < 1 && <span style={{ opacity: 0.5 }}>|</span>}
-            </div>
-          )}
-
-          {/* Impeller removal diagram */}
-          {diagramT > 0 && (
-            <ImpellerDiagram diagramT={diagramT} />
-          )}
         </div>
       )}
 
-      {/* Spacer */}
+      {/* Spacer pushes the input bar to the bottom */}
       <div style={{ flex: 1 }} />
 
-      {/* Bottom mic dock — always visible, pulses with mic state */}
+      {/* Bottom input bar — liquid glass pill with placeholder / live
+          waveform on the left, circular mic button on the right */}
       {micT > 0 && (
         <div style={{
-          display: "flex", alignItems: "center", gap: 10,
-          background: "#FFFFFF",
-          borderRadius: 999,
-          padding: "8px 12px 8px 8px",
-          boxShadow: "0 10px 24px -10px rgba(15,15,18,0.14), 0 1px 3px rgba(15,15,18,0.06)",
+          display: "flex", alignItems: "center", gap: 8,
           opacity: micT,
+          position: "relative", zIndex: 2,
         }}>
-          <MicButton micT={micT} answerT={answerT} />
-          <div style={{ flex: 1 }}>
-            <AudioWaveform micT={micT} answerT={answerT} />
-          </div>
           <div style={{
-            fontSize: 10, fontWeight: 700, color: MUTED,
-            padding: "3px 8px", borderRadius: 999,
-            background: "rgba(15,15,18,0.04)",
-            letterSpacing: "-0.005em",
+            flex: 1,
+            position: "relative",
+            padding: "12px 18px",
+            background:
+              "linear-gradient(180deg, rgba(20,24,36,0.28) 0%, rgba(14,18,28,0.22) 100%)",
+            border: "0.5px solid rgba(255,255,255,0.28)",
+            borderRadius: 999,
+            backdropFilter: "blur(16px) saturate(170%) brightness(0.95)",
+            WebkitBackdropFilter: "blur(16px) saturate(170%) brightness(0.95)",
+            boxShadow:
+              "inset 0 1.5px 0 rgba(255,255,255,0.32), " +
+              "inset 0 -0.5px 0 rgba(255,255,255,0.06), " +
+              "0 6px 14px -6px rgba(0,0,0,0.35)",
+            display: "flex", alignItems: "center",
+            minHeight: 22,
+            overflow: "hidden",
           }}>
-            {answerT > 0.05 ? "Done" : transT >= 1 ? "Processing…" : "Listening…"}
+            {/* Glossy pill sheen */}
+            <div style={{
+              position: "absolute", inset: 0,
+              background:
+                "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 45%)",
+              borderRadius: 999,
+              pointerEvents: "none",
+            }} />
+            <span style={{ position: "relative", width: "100%", display: "flex", alignItems: "center" }}>
+              {listeningNow ? (
+                <AudioWaveform micT={micT} answerT={answerT} />
+              ) : (
+                <span style={{
+                  fontSize: 12, fontWeight: 400,
+                  color: "rgba(255,255,255,0.65)",
+                  letterSpacing: "-0.005em",
+                }}>Type or press and hold…</span>
+              )}
+            </span>
           </div>
+          <MicButton micT={micT} answerT={answerT} />
         </div>
       )}
     </div>
@@ -3465,21 +3751,34 @@ const MicButton: React.FC<{ micT: number; answerT: number }> = ({ micT, answerT 
   const haloScale = 1 + pulse * 0.25;
   const haloAlpha = (listening ? 0.18 + pulse * 0.2 : 0.0);
   return (
-    <div style={{ position: "relative", width: 36, height: 36 }}>
+    <div style={{ position: "relative", width: 40, height: 40 }}>
       <div style={{
         position: "absolute", inset: 0, borderRadius: "50%",
         background: ACCENT,
         transform: `scale(${haloScale.toFixed(3)})`,
         opacity: haloAlpha,
+        filter: "blur(2px)",
       }} />
       <div style={{
         position: "absolute", inset: 0, borderRadius: "50%",
         background: listening
-          ? `linear-gradient(135deg, ${ACCENT} 0%, ${ACCENT_DARK} 100%)`
-          : `linear-gradient(135deg, ${SUCCESS} 0%, ${SUCCESS_DARK} 100%)`,
+          ? `linear-gradient(160deg, rgba(130,160,255,0.95) 0%, ${ACCENT} 45%, ${ACCENT_DARK} 100%)`
+          : `linear-gradient(160deg, rgba(80,230,180,0.95) 0%, ${SUCCESS} 45%, ${SUCCESS_DARK} 100%)`,
+        border: "0.5px solid rgba(255,255,255,0.35)",
         display: "flex", alignItems: "center", justifyContent: "center",
-        boxShadow: `0 4px 10px -2px ${listening ? ACCENT : SUCCESS}55`,
+        boxShadow:
+          `0 8px 18px -6px ${listening ? ACCENT : SUCCESS}AA, ` +
+          `inset 0 1.5px 0 rgba(255,255,255,0.45), ` +
+          `inset 0 -1px 0 rgba(255,255,255,0.08)`,
+        overflow: "hidden",
       }}>
+        {/* Inner gloss sweep */}
+        <div style={{
+          position: "absolute", inset: 0, borderRadius: "50%",
+          background:
+            "linear-gradient(180deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.05) 45%, rgba(255,255,255,0) 65%)",
+          pointerEvents: "none",
+        }} />
         {listening ? (
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <rect x="5" y="1.5" width="4" height="7" rx="2" fill="#fff" />
@@ -3517,6 +3816,497 @@ const AudioWaveform: React.FC<{ micT: number; answerT: number }> = ({ micT, answ
           }} />
         );
       })}
+    </div>
+  );
+};
+
+// ─── ARIA Vision — live camera record + AI video diagnosis ─────────────────
+// Full-screen viewfinder that takes over the mobile UI after the user taps the
+// "Record a video for deeper diagnosis" CTA in the AI help overlay. Shows a
+// mocked live feed of a real impeller on a workbench, with REC indicator,
+// timer, AR anchor dots, bounding boxes highlighting anomalies, and finally a
+// diagnostic card that rises from the bottom with the AI's finding.
+//
+// Props (all 0..1):
+//   riseT      — viewfinder rises over the AI help sheet (slide up from bottom)
+//   recordT    — recording runs (timer, scan dots, bounding boxes populate)
+//   analyzeT   — after record stops, AI analysis overlay sweeps across the feed
+//   diagT      — diagnostic card slides up with the finding + next action
+//   dismissT   — camera slides back down, app flow resumes
+export const PhoneCameraRecord: React.FC<{
+  riseT: number; recordT: number; analyzeT: number; diagT: number;
+  dismissT?: number;
+}> = ({ riseT, recordT, analyzeT, diagT, dismissT = 0 }) => {
+  if (riseT <= 0) return null;
+
+  // iOS sheet-style rise from bottom, full screen
+  const e        = 1 - Math.pow(1 - riseT, 3);
+  const screenH  = 780;
+  const dE       = 1 - Math.pow(1 - dismissT, 3);
+  const yEnter   = (1 - e) * screenH;
+  const yDismiss = dE * screenH;
+
+  // Recording phases for internal beats:
+  //   0.00-0.08 countdown flash  | 0.08-0.90 record active | 0.90-1.00 stop
+  const phase = recordT;
+  const countdown = phase < 0.06 && phase > 0 ? 1 - (phase / 0.06) : 0;
+  const isRec     = phase > 0.06 && phase < 0.95;
+
+  // Timer counting up from 00:00 → 00:08 during the active portion
+  const timerSec = Math.min(8, Math.floor(phase * 9));
+  const timerStr = `00:${String(timerSec).padStart(2, "0")}`;
+
+  // Camera jitter — a little hand-held wobble
+  const jitterX = Math.sin(phase * 40) * 1.1 + Math.sin(phase * 67) * 0.6;
+  const jitterY = Math.cos(phase * 33) * 0.8 + Math.sin(phase * 51) * 0.5;
+
+  // Impeller rotation over the whole clip
+  const rotDeg = phase * 280;
+
+  return (
+    <div style={{
+      position: "absolute",
+      top: 0, left: 0, right: 0, bottom: 0,
+      transform: `translateY(${(yEnter + yDismiss).toFixed(2)}px)`,
+      opacity: 1 - dE,
+      willChange: "transform, opacity",
+      background: "#0A0C10",
+      overflow: "hidden",
+      display: "flex", flexDirection: "column",
+    }}>
+      {/* ─── TOP BAR — ARIA VISION label + REC indicator + close X ─── */}
+      <div style={{
+        position: "absolute", top: 12, left: 14, right: 14,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        zIndex: 20,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{
+            width: 26, height: 26, borderRadius: 8,
+            background: `linear-gradient(135deg, ${ACCENT} 0%, ${PURPLE} 100%)`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: `0 3px 8px -2px ${ACCENT}88`,
+          }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="3.5" stroke="#fff" strokeWidth="1.8" />
+              <circle cx="12" cy="12" r="8.5" stroke="#fff" strokeWidth="1.5"
+                strokeDasharray="3 3" opacity="0.8" />
+            </svg>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{
+              fontSize: 8.5, fontWeight: 800, color: "rgba(255,255,255,0.55)",
+              letterSpacing: "0.16em",
+            }}>ARIA VISION</div>
+            <div style={{
+              fontSize: 11, fontWeight: 800, color: "#fff", letterSpacing: "-0.01em",
+            }}>Diagnose from video</div>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {/* REC pill — pulsing while recording */}
+          {isRec && (() => {
+            const pulse = 0.55 + 0.45 * Math.abs(Math.sin(phase * 22));
+            return (
+              <div style={{
+                display: "flex", alignItems: "center", gap: 5,
+                padding: "3px 8px 3px 6px",
+                borderRadius: 999,
+                background: "rgba(229,57,53,0.16)",
+                border: "1px solid rgba(229,57,53,0.45)",
+              }}>
+                <span style={{
+                  width: 7, height: 7, borderRadius: "50%",
+                  background: "#E53935",
+                  boxShadow: `0 0 ${6 * pulse}px ${2 * pulse}px rgba(229,57,53,${pulse.toFixed(2)})`,
+                  opacity: pulse.toFixed(3),
+                }} />
+                <span style={{
+                  fontSize: 9, fontWeight: 800, color: "#FF9B99",
+                  letterSpacing: "0.14em",
+                }}>REC {timerStr}</span>
+              </div>
+            );
+          })()}
+          {/* Close X */}
+          <div style={{
+            width: 28, height: 28, borderRadius: "50%",
+            background: "rgba(255,255,255,0.1)",
+            border: "1px solid rgba(255,255,255,0.16)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <svg width="10" height="10" viewBox="0 0 11 11" fill="none">
+              <path d="M2.5 2.5l6 6M8.5 2.5l-6 6" stroke="#fff"
+                strokeWidth="1.6" strokeLinecap="round" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── VIEWFINDER — mocked video feed of impeller on workbench ─── */}
+      <div style={{
+        position: "absolute", inset: 0,
+        transform: `translate(${jitterX.toFixed(2)}px, ${jitterY.toFixed(2)}px)`,
+        willChange: "transform",
+      }}>
+        {/* Bench backdrop — warm workshop lighting with vignette */}
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "radial-gradient(ellipse at 50% 55%, #26303C 0%, #161B22 55%, #0A0C10 100%)",
+        }} />
+        {/* Bench surface — concrete/steel table */}
+        <div style={{
+          position: "absolute", left: 0, right: 0, bottom: 0, height: "46%",
+          background: "linear-gradient(180deg, #3A4352 0%, #212832 55%, #13171E 100%)",
+        }} />
+        <div style={{
+          position: "absolute", left: 0, right: 0, bottom: "46%", height: 2,
+          background: "linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%)",
+        }} />
+
+        {/* Grid overlay — subtle bench grid lines */}
+        <svg width="100%" height="100%" viewBox="0 0 400 780"
+          preserveAspectRatio="none"
+          style={{ position: "absolute", inset: 0, opacity: 0.12 }}>
+          {Array.from({ length: 10 }).map((_, i) => (
+            <line key={`h${i}`} x1="0" x2="400"
+              y1={420 + i * 36} y2={420 + i * 36}
+              stroke="#fff" strokeWidth="0.5" />
+          ))}
+          {Array.from({ length: 12 }).map((_, i) => (
+            <line key={`v${i}`} x1={i * 36} x2={i * 36}
+              y1="420" y2="780"
+              stroke="#fff" strokeWidth="0.5" opacity={0.5} />
+          ))}
+        </svg>
+
+        {/* ─── IMPELLER (rotating centrepiece of the video) ─── */}
+        <div style={{
+          position: "absolute",
+          left: "50%", top: "44%",
+          transform: `translate(-50%, -50%) rotate(${rotDeg.toFixed(2)}deg)`,
+          willChange: "transform",
+          width: 220, height: 220,
+        }}>
+          <svg width="220" height="220" viewBox="-50 -50 100 100">
+            <defs>
+              <radialGradient id="impBody" cx="0.3" cy="0.3" r="0.8">
+                <stop offset="0%" stopColor="#D8DEE8" />
+                <stop offset="55%" stopColor="#8A94A6" />
+                <stop offset="100%" stopColor="#434B58" />
+              </radialGradient>
+              <linearGradient id="impBlade" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#C0C8D4" />
+                <stop offset="100%" stopColor="#4E5664" />
+              </linearGradient>
+            </defs>
+            {/* Back shroud */}
+            <circle cx="0" cy="0" r="42" fill="url(#impBody)"
+              stroke="#2A303B" strokeWidth="0.8" />
+            {/* Blades — 7 curved vanes */}
+            {Array.from({ length: 7 }).map((_, i) => {
+              const a = (i / 7) * Math.PI * 2;
+              const x1 = Math.cos(a) * 8,  y1 = Math.sin(a) * 8;
+              const x2 = Math.cos(a + 0.55) * 38, y2 = Math.sin(a + 0.55) * 38;
+              const cx = Math.cos(a + 0.22) * 24, cy = Math.sin(a + 0.22) * 24;
+              return (
+                <path key={i}
+                  d={`M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2} L ${x2 * 0.95} ${y2 * 0.95} Q ${cx * 0.85} ${cy * 0.85} ${x1 * 0.7} ${y1 * 0.7} Z`}
+                  fill="url(#impBlade)" stroke="#1F242D" strokeWidth="0.5" />
+              );
+            })}
+            {/* Hub */}
+            <circle cx="0" cy="0" r="10" fill="#2F3540"
+              stroke="#14181F" strokeWidth="0.6" />
+            <circle cx="0" cy="0" r="5.5" fill="#5A6472" />
+            <circle cx="0" cy="0" r="2" fill="#14181F" />
+            {/* Keyway notch */}
+            <rect x="-1.5" y="-10.5" width="3" height="3" fill="#14181F" />
+          </svg>
+        </div>
+
+        {/* Light beam — thin warm spot above impeller */}
+        <div style={{
+          position: "absolute",
+          left: "50%", top: "-10%",
+          width: 260, height: 520,
+          transform: "translateX(-50%)",
+          background: "radial-gradient(ellipse at 50% 0%, rgba(255,230,180,0.22) 0%, transparent 60%)",
+          pointerEvents: "none",
+        }} />
+
+        {/* Scan sweep bar — during recording */}
+        {isRec && (() => {
+          const scanY = ((phase * 2.2) % 1);
+          return (
+            <div style={{
+              position: "absolute",
+              left: "10%", right: "10%",
+              top: `${(15 + scanY * 60).toFixed(1)}%`,
+              height: 2,
+              background: `linear-gradient(90deg, transparent 0%, ${ACCENT} 50%, transparent 100%)`,
+              opacity: 0.5,
+              filter: "blur(0.5px)",
+            }} />
+          );
+        })()}
+
+        {/* AR anchor dots — appear progressively as AI locks on */}
+        {isRec && (() => {
+          const anchors = [
+            { x: 38, y: 38, after: 0.20, label: "blade 3" },
+            { x: 62, y: 44, after: 0.30, label: "blade 5" },
+            { x: 50, y: 52, after: 0.45, label: "hub" },
+            { x: 70, y: 60, after: 0.60, label: "seal" },
+          ];
+          return anchors.map((a, i) => {
+            const t = clamp((phase - a.after) / 0.08, 0, 1);
+            if (t <= 0) return null;
+            const pulse = 0.6 + 0.4 * Math.abs(Math.sin(phase * 18 + i));
+            return (
+              <div key={i} style={{
+                position: "absolute",
+                left: `${a.x}%`, top: `${a.y}%`,
+                transform: "translate(-50%, -50%)",
+                opacity: t,
+              }}>
+                <div style={{
+                  width: 10, height: 10, borderRadius: "50%",
+                  background: ACCENT,
+                  boxShadow: `0 0 ${8 * pulse}px ${2 * pulse}px ${ACCENT}77`,
+                }} />
+                <div style={{
+                  position: "absolute", left: 14, top: -2,
+                  fontSize: 8, fontWeight: 800, color: "#A8C0FF",
+                  letterSpacing: "0.1em", whiteSpace: "nowrap",
+                  textShadow: "0 1px 2px rgba(0,0,0,0.6)",
+                }}>{a.label.toUpperCase()}</div>
+              </div>
+            );
+          });
+        })()}
+
+        {/* Bounding boxes — appear mid-recording highlighting anomalies */}
+        {isRec && (() => {
+          const boxes = [
+            { x: 32, y: 30, w: 20, h: 16, after: 0.50, label: "BLADE EROSION" },
+            { x: 56, y: 48, w: 18, h: 14, after: 0.68, label: "BEARING PLAY 0.3mm" },
+          ];
+          return boxes.map((b, i) => {
+            const t = clamp((phase - b.after) / 0.10, 0, 1);
+            if (t <= 0) return null;
+            return (
+              <div key={i} style={{
+                position: "absolute",
+                left: `${b.x}%`, top: `${b.y}%`,
+                width: `${b.w}%`, height: `${b.h}%`,
+                border: `1.4px solid ${CRITICAL}`,
+                boxShadow: `0 0 14px -2px ${CRITICAL}66, inset 0 0 12px -4px ${CRITICAL}44`,
+                opacity: t,
+                borderRadius: 3,
+              }}>
+                <div style={{
+                  position: "absolute", left: -1, top: -16,
+                  padding: "2px 6px",
+                  fontSize: 8, fontWeight: 900, color: "#fff",
+                  background: CRITICAL_DARK,
+                  borderRadius: 3,
+                  letterSpacing: "0.1em",
+                  whiteSpace: "nowrap",
+                  boxShadow: `0 3px 8px -3px ${CRITICAL}88`,
+                }}>{b.label}</div>
+                {/* Corner ticks */}
+                {[[0,0],[1,0],[0,1],[1,1]].map(([cx, cy], k) => (
+                  <div key={k} style={{
+                    position: "absolute",
+                    left: cx ? "auto" : -2, right: cx ? -2 : "auto",
+                    top:  cy ? "auto" : -2, bottom: cy ? -2 : "auto",
+                    width: 6, height: 6,
+                    borderTop:    cy ? "none" : `2px solid ${CRITICAL}`,
+                    borderBottom: cy ? `2px solid ${CRITICAL}` : "none",
+                    borderLeft:   cx ? "none" : `2px solid ${CRITICAL}`,
+                    borderRight:  cx ? `2px solid ${CRITICAL}` : "none",
+                  }} />
+                ))}
+              </div>
+            );
+          });
+        })()}
+      </div>
+
+      {/* ─── COUNTDOWN FLASH (3-2-1 replaced by a short white flash) ─── */}
+      {countdown > 0 && (
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "#fff",
+          opacity: countdown * 0.7,
+          pointerEvents: "none",
+        }} />
+      )}
+
+      {/* ─── ANALYZE SWEEP — vertical gradient band crossing the feed ─── */}
+      {analyzeT > 0 && analyzeT < 1 && (() => {
+        const y = analyzeT * 110 - 5;     // -5% to 105%
+        return (
+          <div style={{
+            position: "absolute",
+            left: 0, right: 0,
+            top: `${y}%`, height: "18%",
+            background: `linear-gradient(180deg, transparent 0%, ${ACCENT}44 50%, transparent 100%)`,
+            borderTop: `1px solid ${ACCENT}`,
+            borderBottom: `1px solid ${ACCENT}`,
+            boxShadow: `0 0 20px ${ACCENT}66`,
+            pointerEvents: "none",
+          }} />
+        );
+      })()}
+      {analyzeT > 0.05 && analyzeT < 0.95 && (
+        <div style={{
+          position: "absolute",
+          left: "50%", top: "50%",
+          transform: "translate(-50%, -50%)",
+          padding: "6px 14px",
+          borderRadius: 999,
+          background: "rgba(10,12,16,0.72)",
+          border: `1px solid ${ACCENT}66`,
+          fontSize: 10, fontWeight: 800, color: "#fff",
+          letterSpacing: "0.2em",
+          backdropFilter: "blur(8px)",
+        }}>
+          ANALYZING · 2.4M signatures
+        </div>
+      )}
+
+      {/* ─── DIAGNOSIS CARD — rises from bottom with the finding ─── */}
+      {diagT > 0 && (() => {
+        const dE2 = 1 - Math.pow(1 - diagT, 3);
+        return (
+          <div style={{
+            position: "absolute",
+            left: 12, right: 12, bottom: 16,
+            padding: "14px 16px",
+            background: "rgba(255,255,255,0.98)",
+            borderRadius: 18,
+            boxShadow: "0 20px 40px -12px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.2)",
+            transform: `translateY(${((1 - dE2) * 40).toFixed(2)}px)`,
+            opacity: dE2,
+            display: "flex", flexDirection: "column", gap: 8,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{
+                width: 24, height: 24, borderRadius: 7,
+                background: `linear-gradient(135deg, ${CRITICAL} 0%, ${CRITICAL_DARK} 100%)`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                  <path d="M7 2v5M7 10v1.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{
+                  fontSize: 9, fontWeight: 800, color: CRITICAL_DARK,
+                  letterSpacing: "0.14em",
+                }}>AI DIAGNOSIS · CRITICAL</div>
+                <div style={{ fontSize: 12.5, fontWeight: 800, color: INK,
+                  letterSpacing: "-0.01em" }}>
+                  Impeller blade erosion — 2.3 mm
+                </div>
+              </div>
+            </div>
+            <div style={{
+              fontSize: 10.5, fontWeight: 500, color: INK_SOFT,
+              lineHeight: 1.35,
+            }}>
+              Cavitation damage on blades 3 & 5. Replace assembly within
+              <b> 72 h</b> to avoid shaft imbalance.
+            </div>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8,
+              marginTop: 2,
+            }}>
+              <div style={{
+                flex: 1,
+                padding: "8px 12px",
+                background: `linear-gradient(135deg, ${ACCENT} 0%, ${ACCENT_DARK} 100%)`,
+                borderRadius: 10,
+                fontSize: 11, fontWeight: 800, color: "#fff",
+                textAlign: "center", letterSpacing: "-0.005em",
+                boxShadow: `0 6px 14px -6px ${ACCENT}88`,
+              }}>Attach to WO P-204</div>
+              <div style={{
+                padding: "8px 12px",
+                background: "rgba(15,15,18,0.06)",
+                borderRadius: 10,
+                fontSize: 11, fontWeight: 800, color: INK,
+              }}>Save</div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ─── BOTTOM CONTROL BAR — record button + flash/flip icons ─── */}
+      {diagT < 0.05 && (
+        <div style={{
+          position: "absolute", left: 0, right: 0, bottom: 24,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          gap: 32,
+          opacity: 1 - clamp(diagT * 10, 0, 1),
+        }}>
+          {/* Flash toggle */}
+          <div style={{
+            width: 36, height: 36, borderRadius: "50%",
+            background: "rgba(255,255,255,0.1)",
+            border: "1px solid rgba(255,255,255,0.16)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+              <path d="M8 1L3 8h3l-1 5 5-7H7l1-5z" stroke="#fff"
+                strokeWidth="1.4" strokeLinejoin="round" />
+            </svg>
+          </div>
+          {/* Record button — outer ring + inner red square/circle */}
+          <div style={{
+            width: 58, height: 58, borderRadius: "50%",
+            border: "3px solid #fff",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            background: "transparent",
+            position: "relative",
+          }}>
+            {(() => {
+              // Morph: circle → rounded square during recording
+              const morph = isRec ? 1 : 0;
+              const pulse = isRec ? 0.85 + 0.15 * Math.abs(Math.sin(phase * 14)) : 1;
+              return (
+                <div style={{
+                  width: isRec ? 22 : 44, height: isRec ? 22 : 44,
+                  borderRadius: morph ? 6 : 999,
+                  background: "#E53935",
+                  transition: "width 220ms, height 220ms, border-radius 220ms",
+                  transform: `scale(${pulse.toFixed(3)})`,
+                  boxShadow: isRec
+                    ? `0 0 18px 2px rgba(229,57,53,${(0.4 * pulse).toFixed(3)})`
+                    : "0 0 0 rgba(229,57,53,0)",
+                }} />
+              );
+            })()}
+          </div>
+          {/* Camera flip */}
+          <div style={{
+            width: 36, height: 36, borderRadius: "50%",
+            background: "rgba(255,255,255,0.1)",
+            border: "1px solid rgba(255,255,255,0.16)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M2 6a4 4 0 0 1 7-2.5L10.5 2M14 10a4 4 0 0 1-7 2.5L5.5 14"
+                stroke="#fff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M10.5 2v3h-3M5.5 14v-3h3"
+                stroke="#fff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
