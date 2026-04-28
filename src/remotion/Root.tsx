@@ -11,6 +11,37 @@ import { Act2Composition } from "./act2/Act2Composition";
 import { TOTAL_FRAMES_2, FPS as FPS2 } from "./act2/constants";
 import { ActBonusComposition } from "./actbonus/ActBonusComposition";
 import { TOTAL_FRAMES_BONUS, FPS as FPSBonus } from "./actbonus/constants";
+import { TheStandardsComposition } from "./thestandards/TheStandardsComposition";
+import { SceneStandardsCarousel } from "./thestandards/scenes/SceneStandardsCarousel";
+import {
+  TOTAL_FRAMES_STANDARDS,
+  SCENE_CAROUSEL_DURATION,
+  FPS as FPSStandards,
+} from "./thestandards/constants";
+import { TheClickComposition } from "./theclick/TheClickComposition";
+import { SceneClick } from "./theclick/scenes/SceneClick";
+import {
+  TOTAL_FRAMES_CLICK,
+  SCENE_CLICK_DURATION,
+  FPS as FPSClick,
+} from "./theclick/constants";
+import { TheDiagnosisComposition } from "./thediagnosis/TheDiagnosisComposition";
+import { SceneDiagnosis } from "./thediagnosis/scenes/SceneDiagnosis";
+import { SceneHMI } from "./thediagnosis/scenes/SceneHMI";
+import {
+  SceneLiquidBar,
+  SCENE_LIQUID_BAR_DURATION,
+} from "./thediagnosis/scenes/SceneLiquidBar";
+import {
+  SceneAR,
+  SCENE_AR_DURATION,
+} from "./thediagnosis/scenes/SceneAR";
+import {
+  TOTAL_FRAMES_DIAGNOSIS,
+  SCENE_DIAGNOSIS_DURATION,
+  SCENE_HMI_DURATION,
+  FPS as FPSDiagnosis,
+} from "./thediagnosis/constants";
 
 // ─── Act 1 — Individual scenes ──────────────────────────────────────────────
 import { Scene0Intro } from "./act1/scenes/Scene0Intro";
@@ -103,6 +134,78 @@ export const RemotionRoot: React.FC = () => {
         component={ActBonusComposition}
         durationInFrames={TOTAL_FRAMES_BONUS}
         fps={FPSBonus}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="TheStandards"
+        component={TheStandardsComposition}
+        durationInFrames={TOTAL_FRAMES_STANDARDS}
+        fps={FPSStandards}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="TS-S1-Carousel"
+        component={SceneStandardsCarousel}
+        durationInFrames={SCENE_CAROUSEL_DURATION}
+        fps={FPSStandards}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="TheClick"
+        component={TheClickComposition}
+        durationInFrames={TOTAL_FRAMES_CLICK}
+        fps={FPSClick}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="TC-S1-Click"
+        component={SceneClick}
+        durationInFrames={SCENE_CLICK_DURATION}
+        fps={FPSClick}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="TheDiagnosis"
+        component={TheDiagnosisComposition}
+        durationInFrames={TOTAL_FRAMES_DIAGNOSIS}
+        fps={FPSDiagnosis}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="TD-S1-Diagnosis"
+        component={SceneDiagnosis}
+        durationInFrames={SCENE_DIAGNOSIS_DURATION}
+        fps={FPSDiagnosis}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="TD-S2-HMI"
+        component={SceneHMI}
+        durationInFrames={SCENE_HMI_DURATION}
+        fps={FPSDiagnosis}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="TD-S3-LiquidBar"
+        component={SceneLiquidBar}
+        durationInFrames={SCENE_LIQUID_BAR_DURATION}
+        fps={FPSDiagnosis}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="TD-S4-AugmentedReality"
+        component={SceneAR}
+        durationInFrames={SCENE_AR_DURATION}
+        fps={FPSDiagnosis}
         width={1920}
         height={1080}
       />
