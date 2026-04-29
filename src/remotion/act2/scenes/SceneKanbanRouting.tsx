@@ -28,10 +28,8 @@ const CARD_BORDER = "rgba(214,217,227,0.7)";
 const APPLE_ACCENT = "#3B5BDB";
 
 // ─── Timing (frames @ 30fps) — total 350f ≈ 11.7s ────────────────────────
-// Scene split into clear kinetic beats — something is always moving:
-//   P1   0 – 8    background fades in
-//   P1   6 – 22   banner + LIVE + empty columns land
-//   P2  28 – 140  cards POUR IN column-by-column (NEW → ASSIGNED → IN PROGRESS
+//   P1   0 – 22   bg + banner + LIVE + empty columns land
+//   P2  28 –140   cards POUR IN column-by-column (NEW → ASSIGNED → IN PROGRESS
 //                 → REVIEW → DONE), each column's cards stagger inside it
 //   P3 148 –180   ROUTED badge flashes on WO-2848  (ASSIGNED column spotlight)
 //   P4 190 –230   Flight A : WO-2850  NEW → IN PROGRESS
@@ -44,18 +42,15 @@ const AGENT_A_AT          = 8;
 const AGENT_1_AT          = 10;
 const AGENT_2_AT          = 12;
 const COLS_AT             = 10;
-// Per-column card entrance — each column enters its cards as a burst, with
-// visible gaps between columns so you SEE the board populate station by station.
 const COL_ENTRY_FRAMES: [number, number, number, number, number] = [28, 46, 68, 90, 108];
 const CARD_STAGGER_IN_COL = 8;
-// Phase beats (all AFTER the cards finish entering ~f 140):
 const ROUTE_FLIGHT_START  = 148;
 const ROUTE_FLIGHT_END    = 180;
-const FLIGHT_A_START      = 190;   // WO-2850 : NEW → IN PROGRESS
+const FLIGHT_A_START      = 190;
 const FLIGHT_A_END        = 230;
-const FLIGHT_B_START      = 240;   // WO-2842 : IN PROGRESS → REVIEW
+const FLIGHT_B_START      = 240;
 const FLIGHT_B_END        = 280;
-const FLIGHT_C_START      = 290;   // WO-2838 : REVIEW → DONE (new beat)
+const FLIGHT_C_START      = 290;
 const FLIGHT_C_END        = 330;
 const SCENE_END           = 350;
 // Content opacity window (inner container) — crossfades in during intro.
@@ -359,11 +354,12 @@ export const SceneKanbanRouting: React.FC = () => {
     const riseAt = COL_ENTRY_FRAMES[ci] + i * CARD_STAGGER_IN_COL;
     const sp = spring({
       frame: frame - riseAt, fps,
-      config: { stiffness: 240, damping: 18, mass: 0.75 },
+      // Faster + smoother: higher stiffness, more damping → quick settle, no bounce
+      config: { stiffness: 320, damping: 26, mass: 0.55 },
     });
     const op = interpolate(sp, [0, 1], [0, 1], CLAMP);
-    const ty = interpolate(sp, [0, 1], [48, 0], CLAMP);   // noticeable rise into slot
-    const scale = interpolate(sp, [0, 1], [0.94, 1], CLAMP);
+    const ty = interpolate(sp, [0, 1], [22, 0], CLAMP);   // shorter travel = smoother
+    const scale = interpolate(sp, [0, 1], [0.97, 1], CLAMP);
     return { op, tx: 0, ty, scale };
   };
 

@@ -88,6 +88,9 @@ const wordReveal = (
   });
 };
 
+// Apple-style ease: bezier(0.32, 0.72, 0, 1) — gentle deceleration
+const APPLE_EASE = Easing.bezier(0.32, 0.72, 0, 1);
+
 const isNum = (w: string) => numRegex.test(w);
 
 // ─── Burst dashes ────────────────────────────────────────────────────────────
@@ -179,166 +182,73 @@ export const SceneBlobHold: React.FC = () => {
         const seqLocalF = frame - start;
         if (seqLocalF < -6 || seqLocalF > dur + 20) return null;
 
-        // ── ARROWS: phrase 0→1 horizontal slide, phrase 1→2 diagonal arrows ──
+        // ── ARROWS: clean zoom-in/fade matching the brackets style ──
         if (seq.anim === "arrows") {
-          const phraseEls = seq.phrases.map((phrase, pIdx) => {
+          // Highlight words across the 3 phrases — drawn with accent + underline
+          const HIGHLIGHT: Record<string, true> = {
+            "Faster": true,        // phrase 0
+            "46%": true,           // phrase 1
+            "38%": true,           // phrase 2
+          };
+
+          return seq.phrases.map((phrase, pIdx) => {
             const phaseStart = start + pIdx * PHRASE_DUR;
             const lf = frame - phaseStart;
-            // Phrase 1 renders 12f early so it enters as phrase 0 is exiting
-            const earlyThreshold = pIdx === 1 ? -14 : -2;
-            if (lf < earlyThreshold || lf > PHRASE_DUR + 14) return null;
-            const isLast = pIdx === seq.phrases.length - 1;
-            const ws = wordReveal(phrase, lf, fps);
+            if (lf < -2 || lf > PHRASE_DUR + 14) return null;
 
-            let tx = 0, ty = 0, opacity = 1;
+            // Zoom-in entry: scale from 0.6 → 1 (same as brackets)
+            const entrySp    = spring({ frame: lf, fps, config: { stiffness: 160, damping: 20, mass: 0.8 } });
+            const entryScale = interpolate(entrySp, [0, 1], [0.6, 1], clamp);
+            const entryOp    = interpolate(entrySp, [0, 1], [0, 1], clamp);
 
-            if (pIdx === 0) {
-              // Exit starts at lf=42 — when line reaches right edge
-              const slideOut = spring({ frame: lf - 42, fps, config: { stiffness: 160, damping: 22, mass: 0.9 } });
-              tx = interpolate(slideOut, [0, 1], [0, -1920], clamp);
-              opacity = interpolate(slideOut, [0, 1], [1, 0.1], clamp);
-            }
-            if (pIdx === 1) {
-              // Enters as phrase 0 exits (10f after exit trigger)
-              const slideIn = spring({ frame: lf + 10, fps, config: { stiffness: 140, damping: 24, mass: 0.9 } });
-              tx = interpolate(slideIn, [0, 1], [1920, 0], clamp);
-              // Zoom-in on whole scene
-              const sceneZoomSp = spring({ frame: lf + 10, fps, config: { stiffness: 140, damping: 22, mass: 0.8 } });
-              (ws as any).__sceneZoom = interpolate(sceneZoomSp, [0, 1], [0.8, 1], clamp);
-              // Exit starts sooner so the arrow flows straight into the slide-up (no static hold)
-              const exitSp = spring({ frame: lf - (PHRASE_DUR - 20), fps, config: { stiffness: 160, damping: 24, mass: 0.9 } });
-              ty = interpolate(exitSp, [0, 1], [0, -160], clamp);
-              opacity = interpolate(exitSp, [0, 1], [1, 0], clamp);
-            }
-            if (pIdx === 2) {
-              const enterSp = spring({ frame: lf, fps, config: { stiffness: 120, damping: 22, mass: 1.0 } });
-              const enterTy = interpolate(enterSp, [0, 1], [140, 0], clamp);
-              // Exit slides UP + fades out, dark bg fades in behind
-              const exitTy = interpolate(lf, [PHRASE_DUR - 24, PHRASE_DUR + 2], [0, -180], clamp);
-              ty = enterTy + exitTy;
-              opacity = interpolate(lf, [PHRASE_DUR - 24, PHRASE_DUR + 2], [1, 0], clamp);
-            }
+            // Words appear with stagger
+            const ws = wordReveal(phrase, lf - 4, fps);
 
-            // Line extending right from text end (phrase 0 only — no arrowhead)
-            // Slower spring so the draw keeps moving until the slide-out, no static hold
-            const lineSp = spring({ frame: lf - 8, fps, config: { stiffness: 80, damping: 22, mass: 1.1 } });
-            const lineProg = pIdx === 0 ? interpolate(lineSp, [0, 1], [0, 1], clamp) : 0;
+            // Underline for highlight words (after words settle)
+            const hlUlSp   = spring({ frame: lf - 20, fps, config: { stiffness: 180, damping: 20, mass: 0.8 } });
+            const hlUlProg = interpolate(hlUlSp, [0, 1], [0, 1], clamp);
 
-            // Downward arrow from center of phrase 1 — starts right after word reveal settles, draws briskly
-            const dArrowsSp = pIdx === 1
-              ? spring({ frame: lf - (PHRASE_DUR - 38), fps, config: { stiffness: 200, damping: 24, mass: 0.8 } })
-              : null;
-            const dp = dArrowsSp ? interpolate(dArrowsSp, [0, 1], [0, 1], clamp) : 0;
-
-            // 3 converging arrows on phrase 2 entry
-            const cArrSp = pIdx === 2
-              ? spring({ frame: lf - 4, fps, config: { stiffness: 100, damping: 20, mass: 1.0 } })
-              : null;
-            const cp = cArrSp ? interpolate(cArrSp, [0, 1], [0, 1], clamp) : 0;
-
-            const sceneZoom = (ws as any).__sceneZoom ?? 1;
+            // Soft fade-out
+            const exitOp    = interpolate(lf, [PHRASE_DUR - 22, PHRASE_DUR + 4], [1, 0], clamp);
+            const exitScale = interpolate(lf, [PHRASE_DUR - 22, PHRASE_DUR + 4], [1, 1.06], clamp);
 
             return (
               <div key={`a${sIdx}-${pIdx}`} style={{
-                position: "absolute", inset: 0,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                opacity,
-                transform: `translate(${tx}px, ${ty}px) scale(${sceneZoom})`,
+                position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+                opacity: entryOp * exitOp,
+                transform: `scale(${entryScale * exitScale})`,
                 transformOrigin: "center center",
                 zIndex: 1, pointerEvents: "none", willChange: "transform, opacity",
               }}>
-                {/* Arrow from center of phrase 1 curving straight down */}
-                {dp > 0.001 && (
-                  <svg viewBox="0 0 1920 1080" style={{
-                    position: "absolute", inset: 0, width: 1920, height: 1080, overflow: "visible",
-                  }}>
-                    <path d={`M 960 580 C 960 ${580+dp*80}, 960 ${580+dp*200}, 960 ${580+dp*420}`}
-                      fill="none" stroke={LINE_CLR} strokeWidth="8" strokeLinecap="round"
-                      style={{ strokeDasharray: 600, strokeDashoffset: 600*(1-dp) }} />
-                    <path d={`M 948 ${570+dp*420} L 960 ${590+dp*420} L 972 ${570+dp*420}`}
-                      fill="none" stroke={LINE_CLR} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"
-                      style={{ opacity: dp > 0.85 ? (dp-0.85)/0.15 : 0 }} />
-                  </svg>
-                )}
-
-                {/* 3 converging organic arrows */}
-                {cp > 0.001 && (
-                  <svg viewBox="0 0 1920 1080" style={{
-                    position: "absolute", inset: 0, width: 1920, height: 1080, overflow: "visible",
-                  }}>
-                    {/* Left: organic S-curve from left edge → "Up" */}
-                    <path d="M 0 545 C 70 525, 160 508, 230 518 C 285 526, 325 542, 350 540"
-                      fill="none" stroke={LINE_CLR} strokeWidth="8" strokeLinecap="round"
-                      style={{ strokeDasharray: 380, strokeDashoffset: 380*(1-cp) }} />
-                    <path d="M 332 528 L 350 540 L 332 552"
-                      fill="none" stroke={LINE_CLR} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"
-                      style={{ opacity: cp > 0.85 ? (cp-0.85)/0.15 : 0 }} />
-                    {/* Center: gentle hand-drawn curve from top, single organic bow */}
-                    <path d="M 960 40 C 978 140, 946 260, 962 380 C 968 420, 960 440, 960 452"
-                      fill="none" stroke={LINE_CLR} strokeWidth="8" strokeLinecap="round"
-                      style={{ strokeDasharray: 440, strokeDashoffset: 440*(1-cp) }} />
-                    <path d="M 946 436 L 960 458 L 974 436"
-                      fill="none" stroke={LINE_CLR} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"
-                      style={{ opacity: cp > 0.85 ? (cp-0.85)/0.15 : 0 }} />
-                    {/* Right: organic S-curve from right edge → "costs" */}
-                    <path d="M 1920 545 C 1850 525, 1760 508, 1690 518 C 1635 526, 1595 542, 1570 540"
-                      fill="none" stroke={LINE_CLR} strokeWidth="8" strokeLinecap="round"
-                      style={{ strokeDasharray: 380, strokeDashoffset: 380*(1-cp) }} />
-                    <path d="M 1588 528 L 1570 540 L 1588 552"
-                      fill="none" stroke={LINE_CLR} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"
-                      style={{ opacity: cp > 0.85 ? (cp-0.85)/0.15 : 0 }} />
-                  </svg>
-                )}
-
-                {/* Organic curved line extending right from text (phrase 0 only) */}
-                {lineProg > 0.001 && (
-                  <svg viewBox="0 0 1920 1080" style={{
-                    position: "absolute", inset: 0, width: 1920, height: 1080, overflow: "visible",
-                  }}>
-                    <path d="M 1240 542 C 1360 520, 1520 508, 1680 518 C 1800 526, 1890 536, 1920 540"
-                      fill="none" stroke={LINE_CLR} strokeWidth="9" strokeLinecap="round"
-                      style={{ strokeDasharray: 710, strokeDashoffset: 710*(1-lineProg) }} />
-                  </svg>
-                )}
-
-                {/* Text */}
-                <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "4px 16px", maxWidth: 1400, padding: "0 140px" }}>
-                  {ws.map((s, i) => (
-                    <span key={i} style={{
-                      display: "inline-block", fontFamily: geistFont, fontSize: 60, fontWeight: 800,
-                      letterSpacing: "-0.035em", lineHeight: 1.15,
-                      color: isNum(s.w) ? ACCENT : INK,
-                      opacity: s.op, transform: `translateY(${s.ty}px)`, willChange: "transform, opacity",
-                    }}>{s.w}</span>
-                  ))}
+                <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "4px 16px", maxWidth: 1400, padding: "0 100px" }}>
+                  {ws.map((s, i) => {
+                    const isHl = HIGHLIGHT[s.w] === true || isNum(s.w);
+                    return (
+                      <span key={i} style={{
+                        position: "relative", display: "inline-block",
+                        fontFamily: geistFont, fontSize: 60, fontWeight: 800,
+                        letterSpacing: "-0.035em", lineHeight: 1.15,
+                        color: isHl ? ACCENT : INK,
+                        opacity: s.op, transform: `translateY(${s.ty}px)`, willChange: "transform, opacity",
+                      }}>
+                        {s.w}
+                        {isHl && hlUlProg > 0.001 && (
+                          <svg viewBox="0 0 200 12" preserveAspectRatio="none" style={{
+                            position: "absolute", left: 0, right: 0, bottom: -4,
+                            width: "100%", height: 8, overflow: "visible",
+                          }}>
+                            <line x1="0" y1="6" x2="200" y2="6"
+                              stroke={ACCENT} strokeWidth="4" strokeLinecap="round"
+                              style={{ strokeDasharray: 200, strokeDashoffset: 200 * (1 - hlUlProg) }} />
+                          </svg>
+                        )}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             );
           });
-
-          // ── Fixed horizontal arrow overlay ──────────────────────────────
-          // Starts at seqLocalF=52 (when line hits right edge = lf≈42 + SCENE_BUFFER=10)
-          const hOverlapF = seqLocalF - 52;
-          const hSp = spring({ frame: hOverlapF, fps, config: { stiffness: 140, damping: 20, mass: 0.9 } });
-          const hProg = hOverlapF > 0 ? interpolate(hSp, [0, 1], [0, 1], clamp) : 0;
-          // Fade out before phrase 2 starts (seqLocalF=120)
-          const hFadeOp = interpolate(seqLocalF,
-            [PHRASE_DUR * 2 - 18, PHRASE_DUR * 2 - 4], [1, 0], clamp);
-          const hOverlay = hProg > 0.001 ? (
-            <svg key={`h-ov-${sIdx}`} viewBox="0 0 1920 1080" style={{
-              position: "absolute", inset: 0, width: 1920, height: 1080, overflow: "visible",
-              zIndex: 2, pointerEvents: "none", opacity: hFadeOp,
-            }}>
-              <path d="M 0 545 C 70 525, 160 508, 230 518 C 285 526, 325 542, 350 540"
-                fill="none" stroke={LINE_CLR} strokeWidth="8" strokeLinecap="round"
-                style={{ strokeDasharray: 380, strokeDashoffset: 380*(1-hProg) }} />
-              <path d="M 332 528 L 350 540 L 332 552"
-                fill="none" stroke={LINE_CLR} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"
-                style={{ opacity: hProg > 0.85 ? (hProg-0.85)/0.15 : 0 }} />
-            </svg>
-          ) : null;
-
-          return [...phraseEls, hOverlay];
         }
 
         // ── INVERT (dark bg, white text, number pop) ────────────────────

@@ -50,34 +50,52 @@ export const SCENE_WHATIF_INTERSTITIAL_START    = 1686;
 export const SCENE_WHATIF_INTERSTITIAL_OFFSET   = 486;
 export const SCENE_WHATIF_INTERSTITIAL_DURATION = 140;
 
+// BlobHold Part 2b-i — Seq 2 + start of Seq 3 (Blob-local 310..478).
+// Plays through "Autonomous task management" full reveal (ends at 1994).
 export const SCENE_BLOB_HOLD_PART2B_START    = 1826;
-export const SCENE_BLOB_HOLD_PART2B_DURATION = 312;
+export const SCENE_BLOB_HOLD_PART2B_DURATION = 168;
 
-export const SCENE_KANBAN_START    = 2138;
+// SceneKanbanFlow — standalone scene: WO-2848 detail card materializes,
+// tilts into 3D perspective, then "and execution" overlays above. NOTHING
+// else (no full kanban board, no route flights — those live in SceneKanbanRouting).
+export const SCENE_KANBAN_FLOW_START    = 1994;
+export const SCENE_KANBAN_FLOW_DURATION = 180;
+
+// BlobHold Part 2b-ii — picks back up at "means" + "Reduction in staff costs"
+// (Blob-local 526..622). The skipped "and execution" beat (478..526) is now
+// owned by SceneKanbanFlow.
+export const SCENE_BLOB_HOLD_PART2B2_START    = 2174;
+export const SCENE_BLOB_HOLD_PART2B2_DURATION = 96;
+export const SCENE_BLOB_HOLD_PART2B2_OFFSET   = 526;  // skip "and execution"
+
+// SceneKanbanRouting — original interactive kanban (cards burst into columns,
+// ROUTED flash, 3 sequential flights, settle). Restored to its native timing.
+export const SCENE_KANBAN_START    = 2270;
 export const SCENE_KANBAN_DURATION = 350;
 
-export const SCENE_BLOB_HOLD_PART2C_START    = 2488;
-export const SCENE_BLOB_HOLD_PART2C_DURATION = 204;
+// BlobHold Part 2c — closing zoom sequence (Blob-local 622..785).
+export const SCENE_BLOB_HOLD_PART2C_START    = 2620;
+export const SCENE_BLOB_HOLD_PART2C_DURATION = 163;
 
-export const SCENE_FORM_START    = 2692;
+export const SCENE_FORM_START    = 2783;
 export const SCENE_FORM_DURATION = 1320;
 
-export const SCENE_2_START    = 4012;
+export const SCENE_2_START    = 4103;
 export const SCENE_2_DURATION = 180;
 
-export const SCENE_3_START    = 4192;
+export const SCENE_3_START    = 4283;
 export const SCENE_3_DURATION = 180;
 
-export const SCENE_4_START    = 4372;
+export const SCENE_4_START    = 4463;
 export const SCENE_4_DURATION = 210;
 
-export const SCENE_5_START    = 4582;
+export const SCENE_5_START    = 4673;
 export const SCENE_5_DURATION = 150;
 
-export const SCENE_6_START    = 4732;
+export const SCENE_6_START    = 4823;
 export const SCENE_6_DURATION = 150;
 
-export const TOTAL_FRAMES_2   = 4882; // ~162.7s
+export const TOTAL_FRAMES_2   = 4973; // ~165.8s
 
 // AriA Design Tokens (exact from real software)
 export const ARIA_COLORS = {

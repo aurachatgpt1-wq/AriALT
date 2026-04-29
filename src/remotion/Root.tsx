@@ -9,6 +9,11 @@ import { Act15Composition } from "./act15/Act15Composition";
 import { TOTAL_FRAMES_15, FPS as FPS15 } from "./act15/constants";
 import { Act2Composition } from "./act2/Act2Composition";
 import { TOTAL_FRAMES_2, FPS as FPS2 } from "./act2/constants";
+import {
+  AutonomousFlowComposition,
+  AUTONOMOUS_FLOW_DURATION,
+  AUTONOMOUS_FLOW_FPS,
+} from "./act2/AutonomousFlowComposition";
 import { ActBonusComposition } from "./actbonus/ActBonusComposition";
 import { TOTAL_FRAMES_BONUS, FPS as FPSBonus } from "./actbonus/constants";
 
@@ -119,6 +124,14 @@ export const RemotionRoot: React.FC = () => {
         component={Act2Composition}
         durationInFrames={TOTAL_FRAMES_2}
         fps={FPS2}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="Act2-AutonomousFlow"
+        component={AutonomousFlowComposition}
+        durationInFrames={AUTONOMOUS_FLOW_DURATION}
+        fps={AUTONOMOUS_FLOW_FPS}
         width={1920}
         height={1080}
       />

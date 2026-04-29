@@ -15,6 +15,9 @@ import {
   SCENE_WHATIF_INTERSTITIAL_OFFSET,
   SCENE_WHATIF_INTERSTITIAL_DURATION,
   SCENE_BLOB_HOLD_PART2B_START, SCENE_BLOB_HOLD_PART2B_DURATION,
+  SCENE_KANBAN_FLOW_START, SCENE_KANBAN_FLOW_DURATION,
+  SCENE_BLOB_HOLD_PART2B2_START, SCENE_BLOB_HOLD_PART2B2_DURATION,
+  SCENE_BLOB_HOLD_PART2B2_OFFSET,
   SCENE_BLOB_HOLD_PART2C_START, SCENE_BLOB_HOLD_PART2C_DURATION,
   SCENE_FORM_START, SCENE_FORM_DURATION,
   SCENE_2_START, SCENE_2_DURATION,
@@ -27,6 +30,7 @@ import {
 import { Scene1LogoReveal }       from "./scenes/Scene1LogoReveal";
 import { SceneAreas }             from "./scenes/SceneAreas";
 import { SceneAgentCMMS }         from "./scenes/SceneAgentCMMS";
+import { SceneKanbanFlow }        from "./scenes/SceneKanbanFlow";
 import { SceneKanbanRouting }     from "./scenes/SceneKanbanRouting";
 import { SceneWorkOrderExecCinema } from "./scenes/SceneWorkOrderExecCinema";
 import { SceneBlobHold }          from "./scenes/SceneBlobHold";
@@ -113,6 +117,10 @@ export const Act2Composition: React.FC = () => {
           Ends right after "Reduction in staff costs" — Seq 3's last phrase
           fades to invisible by Blob-local 622 and the burst dark bg ends
           there too, so Part 2b exits on clean light bg. */}
+      {/* BlobHold Part 2b-i — through "Autonomous task management" reveal.
+          Then SceneKanbanFlow takes over (detail card + perspective + "and
+          execution"), then BlobHold resumes for "means" + "Reduction in
+          staff costs", then SceneKanbanRouting (cards + flights). */}
       <Sequence
         from={SCENE_BLOB_HOLD_PART2B_START}
         durationInFrames={SCENE_BLOB_HOLD_PART2B_DURATION}
@@ -121,11 +129,19 @@ export const Act2Composition: React.FC = () => {
           <SceneBlobHold />
         </Sequence>
       </Sequence>
-      {/* ── Kanban interstitial ─────────────────────────────────────────
-          SceneKanbanRouting plays BETWEEN "Reduction in staff costs" (end
-          of Seq 3) and "Every optimization..." (start of Seq 4). Kanban's
-          PAGE_BG (#F3F4F7) ≈ BlobHold LIGHT_BG (#F0F3FF) so the bg swap is
-          visually seamless. */}
+      <Sequence from={SCENE_KANBAN_FLOW_START} durationInFrames={SCENE_KANBAN_FLOW_DURATION}>
+        <SceneKanbanFlow />
+      </Sequence>
+      <Sequence
+        from={SCENE_BLOB_HOLD_PART2B2_START}
+        durationInFrames={SCENE_BLOB_HOLD_PART2B2_DURATION}
+      >
+        <Sequence from={-SCENE_BLOB_HOLD_PART2B2_OFFSET}>
+          <SceneBlobHold />
+        </Sequence>
+      </Sequence>
+      {/* ── Kanban routing — cards burst into columns + ROUTED flash + 3
+          sequential flights. Original 350-frame interactive kanban take. */}
       <Sequence from={SCENE_KANBAN_START} durationInFrames={SCENE_KANBAN_DURATION}>
         <SceneKanbanRouting />
       </Sequence>
