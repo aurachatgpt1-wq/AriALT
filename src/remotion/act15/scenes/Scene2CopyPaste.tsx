@@ -33,13 +33,17 @@ const CLAMP = { extrapolateLeft: "clamp" as const, extrapolateRight: "clamp" as 
 const TITLE_AT      = 0;
 const SCREENS_ENTER = 0;
 
-const ACTION_SENT_AT = 195;
+// Aligned to the mouse motion: Copy at scene-local 56 (= 00:06.11 global),
+// Paste at 62 (= 00:06.17). Then Email + Repeat follow with tighter cadence.
+const ACTION_SENT_AT = 56;
 const SCENE_END      = 300;
 
 // Browser chrome (Safari-like frame) builds around the carried-over text
 // first; new Q&A is pasted below only after the chrome is present.
 const CHROME_BUILD   = 18;
-const CYCLE_DELAY    = 25;
+// Pulled in from 25 → 12 so cycle 1 paste lands at 00:06.17 in Act15-ThePatch
+// timeline (Scene2 starts at global frame 135, scene-local 62 = 197 = 6.567s).
+const CYCLE_DELAY    = 12;
 
 // Shared perspective
 const ROT_X = 7;
@@ -232,10 +236,10 @@ export const Scene2CopyPaste: React.FC = () => {
 
   // Action sentence
   const actionWords = [
-    { text: "Copy.",   appearFrame: ACTION_SENT_AT },
-    { text: "Paste.",  appearFrame: ACTION_SENT_AT + 10 },
-    { text: "Email.",  appearFrame: ACTION_SENT_AT + 20 },
-    { text: "Repeat.", appearFrame: ACTION_SENT_AT + 30 },
+    { text: "Copy.",   appearFrame: ACTION_SENT_AT },        // 00:06.11
+    { text: "Paste.",  appearFrame: ACTION_SENT_AT + 6 },    // 00:06.17
+    { text: "Email.",  appearFrame: ACTION_SENT_AT + 14 },   // 00:06.25
+    { text: "Repeat.", appearFrame: ACTION_SENT_AT + 22 },   // 00:07.03
   ];
 
   return (
